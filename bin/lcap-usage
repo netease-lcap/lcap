@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+
+const path = require('path');
+const fs = require('fs-extra');
+const getUsage = require('../lib/lcap');
+const configurator = require('../lib/config');
+const root = process.cwd();
+
+const program = require('commander');
+program
+    .usage('<dest>')
+    .description(`Generate usage json`)
+    .option('-t, --type <type>', 'type', 'component')
+    .parse(process.argv);
+
+const staticUrl = configurator.get('static');
+const usage = getUsage(root);
+if (program.type === 'component') {
+    const packageJSON = require(path.resolve('./package.json'));
+    const libInfo = `${packageJSON.name}@${packageJSON.version}`;
+    let screenShot = JSON.parse(usage.screenShot);
+    screenShot = screenShot.map((screen) => `${staticUrl}/packages/${libInfo}/screenshots/${screen}`);
+    usage.jsonSchema.screenShot = usage.screenShot = screenShot.join(',');
+}
+
+fs.writeFileSync(path.join(root, 'usage.json'), JSON.stringify(usage, null, 4));

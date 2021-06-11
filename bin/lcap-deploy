@@ -1,0 +1,101 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const path = require('path');
+const semver = require('semver');
+const vusion = require('vusion-api');
+const cli = vusion.cli;
+
+/**
+ * Parse Commands
+ */
+const program = require('commander');
+program
+    .usage('[source]')
+    .description(`Push files to NOS static bucket. Defaults to 'public'`)
+    .option('--framework <framework>', `publish framework`)
+    .option('-v, --version-level <version-level>', `Specify the minimum version level after '@'. 'major', 'minor', 'patch'`, 'patch')
+    .option('-n, --name <name>', `Custom package name`)
+    .option('-V, --version <packageVersion>', `Custom package version`)
+    .parse(process.argv);
+
+let source = program.args[0] || 'public';
+const cwd = process.cwd();
+source = path.resolve(cwd, source);
+
+if (!fs.existsSync(source)) {
+    console.error(`Cannot find source: ${source}`);
+    process.exit(1);
+}
+const isFramework = !!program.framework;
+const pkgPath = path.resolve(process.cwd(), 'package.json');
+if (!fs.existsSync(pkgPath)) {
+    console.error('[ERROR] Not a npm package');
+    console.error('Please locate into a npm package source.');
+    process.exit(1);
+}
+const pkg = require(pkgPath);
+let version = program.packageVersion || pkg.version;
+if (!semver.valid(version)) {
+    console.error(`Invalid version ${version}`);
+    process.exit(1);
+}
+if (program.versionLevel === 'major')
+    version = version.split('.')[0];
+else if (program.versionLevel === 'minor')
+    version = version.split('.').slice(0, 2).join('.');
+
+const prefix = `packages/${typeof program.name === 'string' ? program.name : pkg.name}@${version}`;
+let formFiles;
+
+if (fs.statSync(source).isDirectory()) {
+    formFiles = vusion.fs.listAllFiles(source, {
+        type: 'file',
+        dot: false,
+        patterns: ['!**/node_modules', '!**/.git'],
+    });
+} else {
+    formFiles = [source];
+}
+
+if (!formFiles.length) {
+    cli.warn('No files found!');
+    process.exit(0);
+}
+
+formFiles = formFiles.map((filePath) => {
+    let relativePath = path.relative(cwd, filePath).replace(/^public[\\/]/, '');
+    relativePath = path.join(prefix, relativePath);
+    return { name: relativePath, path: filePath };
+});
+
+let upload = null;
+if (isFramework) {
+    upload = vusion.ms.upload.framework(formFiles, program.framework);
+} else {
+    upload = vusion.ms.upload.nos(formFiles);
+}
+
+upload.then(({ result }) => {
+    let first = result[0];
+    for (let i = 0; i < result.length; i++) {
+        first = result[i];
+        if (!first.key.includes('404')) // 404 的文件给人感觉不友好
+            break;
+    }
+    // const url = `https://${first.bucket}.${first.endpoint}${+first.port === 80 ? '' : ':' + first.port}/${first.key}`;
+    const url = 'https://static-vusion.163yun.com/' + first.key;
+    cli.done(`Successfully deployed files '${path.relative(cwd, source)}' to NOS static bucket.
+Try to access: ${url}`);
+}).catch((e) => {
+    if (e.response && e.response.status === 413) {
+        cli.error('Exceeded size of files!');
+        console.error(e.toString());
+    } else {
+        if (e.response)
+            console.error(e.response.data);
+        else
+            cli.error(e);
+    }
+    process.exit(1);
+});

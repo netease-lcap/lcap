@@ -1,0 +1,66 @@
+#!/usr/bin/env node
+
+const vusion = require('vusion-api');
+const configurator = require('../lib/config');
+const cli = vusion.cli;
+
+/**
+ * Parse Commands
+ */
+const program = require('commander');
+program
+    .usage('<action> <key> <value>')
+    .description(`Configure CLI options
+
+Commands:
+  list                            List all config
+  set <key> <value>               Set an option value. For example: lcap config set access_token f2224e629a7e24423e6b1bf6
+  get <key>                       Get a value of an option. For example: lcap config get access_token
+  delete <key>                    Delete a option. For example: lcap config delete default_registry
+  add registry <manager> <url>    Add a pair of manager and registry. For example: lcap config add registry cnpm https://registry.npm.taobao.org
+  remove registry <manager>       Remove a pair of manager and registry. For example: lcap config remove registry cnpm
+  edit                            Use vim to edit config directly
+`)
+    .parse(process.argv);
+
+const config = configurator.load();
+
+let [action, key, value, url] = program.args;
+
+if (action === 'set') {
+    if (key === 'platform' || key === 'static')
+        value = value.replace(/\/$/, '');
+
+    config[key] = value;
+    configurator.save();
+    cli.done(key + '=' + value);
+} else if (action === 'get') {
+    console.info(config[key]);
+} else if (action === 'delete') {
+    delete config[key];
+    configurator.save();
+    cli.done('Deleted key ' + key);
+} else if (action === 'add') {
+    if (key === 'registry') {
+        url = url.replace(/\/$/, '');
+
+        config.registries = config.registries || {};
+        config.registries[value] = url;
+        configurator.save();
+        cli.done(value + '=' + url);
+    }
+} else if (action === 'remove') {
+    if (key === 'registry') {
+        config.registries = config.registries || {};
+        delete config.registries[value];
+        configurator.save();
+        cli.done('Remove registry ' + value);
+    }
+} else if (action === 'list') {
+    console.info(configurator.yaml);
+} else if (action === 'edit') {
+    cli.exec('vi', configurator.rcPath);
+} else {
+    cli.error('Unknown action of lcap-config!');
+    process.exit(1);
+}

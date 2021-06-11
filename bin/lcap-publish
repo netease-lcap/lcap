@@ -1,0 +1,193 @@
+#!/usr/bin/env node
+
+const fs = require('fs-extra');
+const path = require('path');
+const semver = require('semver');
+const chalk = require('chalk');
+const inquirer = require('inquirer');
+const vusion = require('vusion-api');
+const configurator = require('../lib/config');
+const cli = vusion.cli;
+
+const cwd = process.cwd();
+const pkgPath = path.resolve(cwd, 'package.json');
+if (!fs.existsSync(pkgPath)) {
+    console.error('[ERROR] Not a npm package');
+    console.error('Please locate into a npm package directory.');
+    process.exit(1);
+}
+let pkg = require(pkgPath);
+
+/**
+ * Parse Commands
+ */
+const program = require('commander');
+program
+    .usage('<version>')
+    .option('--tag <tag>', 'Registers the published package with the given tag')
+    .option('--access <public|restricted>', 'Tells the registry whether this package should be published as public or restricted.')
+    .option('--manager <manager>', 'Change publish manager. For example: --manager cnpm')
+    .option('--registry <url>', 'Use custom registry if manager default registry is not you want. For example: --registry https://registry.npm.taobao.org')
+    .option('--skip-npm', 'Skip npm publish. Useful when package published but error happened')
+    .parse(process.argv);
+
+const name = pkg.name;
+const currentVersion = pkg.version;
+let version = program.args[0] && semver.clean(program.args[0]);
+const config = configurator.load();
+
+const manager = program.manager || config.publish_manager;
+const registry = program.registry || config.registries[config.publish_manager];
+
+const ACCESS_MAP = {
+    public: 1,
+    private: 2,
+    team: 3,
+};
+
+async function publish() {
+    console.info(`  Package ${chalk.yellow(name)}`);
+    console.info('  Current version: ' + chalk.cyan(currentVersion));
+
+    if (!version) {
+        const arr = currentVersion.split('.');
+        const choices = [
+            { name: 'patch', value: [arr[0], arr[1], +arr[2] + 1].join('.') },
+            { name: 'minor', value: [arr[0], +arr[1] + 1, 0].join('.') },
+            { name: 'major', value: [+arr[0] + 1, 0, 0].join('.') },
+        ];
+        choices.forEach((choice) => choice.name += ' - ' + choice.value);
+
+        const { newVersion } = await inquirer.prompt([{
+            type: 'list',
+            name: 'newVersion',
+            message: `Which version do you want to publish?`,
+            choices,
+        }]);
+
+        version = newVersion;
+    }
+
+    const message = `      New version: ${chalk.cyan(version)}`;
+    console.info(message);
+    console.info('-'.repeat(32));
+
+    const { yes } = await inquirer.prompt([{
+        name: 'yes',
+        type: 'confirm',
+        message: 'Make sure to continue',
+    }]);
+
+    if (!yes)
+        return;
+
+    pkg.version = version;
+
+    const npmCmds = [`${/^win/.test(process.platform) ? manager + '.cmd' : manager} publish`];
+    if (program.tag)
+        npmCmds.push(`--tag ${program.tag}`);
+
+    if (program.access)
+        npmCmds.push(`--access ${program.access}`);
+    else if (pkg.name.includes('/'))
+        npmCmds.push(`--access public`);
+
+    if (program.registry)
+        npmCmds.push(`--registry ${registry}`);
+
+    try {
+        if (pkg.vusion && (pkg.vusion.type === 'component' || pkg.vusion.type === 'block' || pkg.vusion.type === 'template')) {
+            await vusion.ms.getBlocks(); // 判断网络是否 OK
+
+            if (pkg.vusion.type !== 'template') {
+                // 兼容老版，以后私有库可能有用
+                const isOnNOS = pkg.scripts.deploy && pkg.scripts.deploy.includes('vusion deploy');
+                let staticBaseURL = isOnNOS ? 'https://static-vusion.163yun.com/packages' : 'https://unpkg.com';
+                staticBaseURL += `/${pkg.name}@${pkg.version}`;
+                // if (registry.starsWith('https://registry.npmjs.org'))
+                pkg.homepage = isOnNOS ? `${staticBaseURL}/index.html` : `${staticBaseURL}/public/index.html`;
+            }
+
+            let repository = pkg.repository || '';
+            if (typeof pkg.repository === 'object')
+                repository = repository.url.replace(/\.git$/, '') + (pkg.repository.directory ? '/tree/master/' + pkg.repository.directory : '');
+            else if (!pkg.repository.startsWith('http'))
+                repository = 'https://github.com/' + pkg.repository;
+
+            if (pkg.vusion.team) {
+                const result = await vusion.ms.teamExist(pkg.vusion.team);
+                if (!result) {
+                    cli.error(`You are not in team '${pkg.vusion.team}'!`);
+                    process.exit(1);
+                }
+            }
+
+            await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+
+            !program.skipNpm && await cli.exec(npmCmds.join(' ')); // prepublishOnly
+
+            console.info();
+            cli.done('Successfully published!');
+
+            pkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
+
+            let publishFunc;
+            let blocks;
+            if (pkg.vusion.type === 'component') {
+                publishFunc = vusion.ms.publishComponent;
+
+                // 'lcap screenshot public/index.html#blocks --code-example --max-count 10 --smart-crop --package'
+                const screenshotScript = pkg.scripts.screenshot;
+                if (screenshotScript && screenshotScript.includes('--code-example')) {
+                    const cap = screenshotScript.match(/(?:--max-count|-m)\s+(\d+)/);
+                    const maxCount = cap ? +cap[1] : 10;
+                    const vueFile = new vusion.VueFile(cwd);
+                    const cap2 = screenshotScript.match(/public\/index\.html#(.+?)\s/);
+                    await vueFile.open();
+                    await vueFile.loadExamples(cap2 ? cap2[1] + '.md' : undefined);
+                    // const apiHandler = vueFile.parseAPI();
+                    const examplesHandler = vueFile.parseExamples();
+                    blocks = examplesHandler && JSON.stringify(examplesHandler.toJSON().slice(0, maxCount));
+                }
+            } else if (pkg.vusion.type === 'block')
+                publishFunc = vusion.ms.publishBlock;
+            else if (pkg.vusion.type === 'template')
+                publishFunc = vusion.ms.publishTemplate;
+
+            await publishFunc(Object.assign({}, pkg, {
+                // homepage,
+                repository,
+                labels: pkg.keywords && pkg.keywords.join(','),
+                title: pkg.vusion.title || pkg.title,
+                description: pkg.vusion.description || pkg.description,
+                category: pkg.vusion.category,
+                access: ACCESS_MAP[pkg.vusion.access],
+                blocks,
+                screenshots: pkg.vusion.screenshots && pkg.vusion.screenshots.slice(0, 12).join(','),
+                base: pkg.vusion.base || 'vue',
+                ui: pkg.vusion.ui || 'cloud-ui.vusion',
+                registry,
+                team: pkg.vusion.team,
+                dependencies: JSON.stringify(pkg.dependencies),
+                vusionDependencies: JSON.stringify(pkg.vusionDependencies),
+            }));
+            cli.done('Registered package on lcap platform.');
+
+            if (pkg.scripts.deploy)
+                await cli.exec('npm run deploy');
+        } else { // 普通 publish
+            await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+            !program.skipNpm && await cli.exec(npmCmds.join(' ')); // prepublishOnly
+
+            console.info();
+            cli.done('Successfully published!');
+        }
+    } catch (e) {
+        console.info();
+        cli.error('Failed to publish!');
+        e && console.error(e.response ? e.response.data : e);
+        process.exit(1);
+    }
+}
+
+publish();

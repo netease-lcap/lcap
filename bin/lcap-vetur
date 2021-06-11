@@ -1,0 +1,67 @@
+#!/usr/bin/env node
+
+const fs = require('fs-extra');
+const path = require('path');
+const vusion = require('vusion-api');
+const cli = vusion.cli;
+
+/**
+ * Parse Commands
+ */
+const program = require('commander');
+program
+    .usage('[directory]')
+    .description(`Generate tags.json and attributes.json for Vetur`)
+    .parse(process.argv);
+
+const directory = program.args[0] || '';
+const absolutePath = path.resolve(process.cwd(), directory);
+
+if (!fs.existsSync(absolutePath))
+    console.error(`Cannot find directory: ${absolutePath}`);
+if (!fs.statSync(absolutePath).isDirectory())
+    console.error(`"${absolutePath}" is not a directory!`);
+
+const vetur = {
+    tags: {},
+    attributes: {},
+};
+
+let files;
+try {
+    const pkg = require(path.resolve(absolutePath, 'package.json'));
+    if (pkg.name === 'cloud-ui.vusion') {
+        files = vusion.fs.listAllFiles(path.join(directory, 'node_modules/proto-ui.vusion'), {
+            patterns: ['!proto-ui.vusion/node_modules'],
+            includes: /api\.yaml$/,
+        }).concat(vusion.fs.listAllFiles(directory, {
+            patterns: ['!**/node_modules', '!**/.git'],
+            includes: /api\.yaml$/,
+        }));
+    }
+} catch (e) {}
+
+if (!files) {
+    files = vusion.fs.listAllFiles(directory, {
+        patterns: ['!**/node_modules', '!**/.git'],
+        includes: /api\.yaml$/,
+    });
+}
+
+files.forEach((filePath) => {
+    const raw = fs.readFileSync(filePath, 'utf8');
+    const apiHandler = new vusion.fs.APIHandler(raw, path.resolve(filePath));
+    let partial;
+    try {
+        partial = apiHandler.toVetur();
+    } catch (e) {
+        cli.error(filePath);
+        throw e;
+    }
+    Object.assign(vetur.tags, partial.tags);
+    Object.assign(vetur.attributes, partial.attributes);
+});
+
+fs.outputFileSync(path.resolve(process.cwd(), 'vetur/tags.json'), JSON.stringify(vetur.tags, null, 2));
+fs.outputFileSync(path.resolve(process.cwd(), 'vetur/attributes.json'), JSON.stringify(vetur.attributes, null, 2));
+cli.done('Generated vetur tags.json and attributes.json');
