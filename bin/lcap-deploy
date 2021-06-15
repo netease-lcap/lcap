@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
 const vusion = require('vusion-api');
+const upload = require('../lib/upload');
 const cli = vusion.cli;
 
 /**
@@ -27,7 +28,7 @@ if (!fs.existsSync(source)) {
     console.error(`Cannot find source: ${source}`);
     process.exit(1);
 }
-const isFramework = !!program.framework;
+// const isFramework = !!program.framework;
 const pkgPath = path.resolve(process.cwd(), 'package.json');
 if (!fs.existsSync(pkgPath)) {
     console.error('[ERROR] Not a npm package');
@@ -69,33 +70,4 @@ formFiles = formFiles.map((filePath) => {
     return { name: relativePath, path: filePath };
 });
 
-let upload = null;
-if (isFramework) {
-    upload = vusion.ms.upload.framework(formFiles, program.framework);
-} else {
-    upload = vusion.ms.upload.nos(formFiles);
-}
-
-upload.then(({ result }) => {
-    let first = result[0];
-    for (let i = 0; i < result.length; i++) {
-        first = result[i];
-        if (!first.key.includes('404')) // 404 的文件给人感觉不友好
-            break;
-    }
-    // const url = `https://${first.bucket}.${first.endpoint}${+first.port === 80 ? '' : ':' + first.port}/${first.key}`;
-    const url = 'https://static-vusion.163yun.com/' + first.key;
-    cli.done(`Successfully deployed files '${path.relative(cwd, source)}' to NOS static bucket.
-Try to access: ${url}`);
-}).catch((e) => {
-    if (e.response && e.response.status === 413) {
-        cli.error('Exceeded size of files!');
-        console.error(e.toString());
-    } else {
-        if (e.response)
-            console.error(e.response.data);
-        else
-            cli.error(e);
-    }
-    process.exit(1);
-});
+upload(formFiles);

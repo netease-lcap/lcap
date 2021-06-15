@@ -38,11 +38,8 @@ lcap init
 - `publish <version>`: Publish a new version
 - `screenshot <url|local-file>`: Take a screenshot of a web page
 - `deploy`: Push files to NOS static bucket
-- `ghpages`: Push a directory to gh-pages
 - `readme`: Generate final readable README.md from api.yaml and docs
 - `vetur`: Generate tags.json and attributes.json for Vetur
-- `diff <source> <target>`: Check differences between two path files
-- `sync <source> <target>`: Sync files from one path to another. Support watch mode
 - `help [cmd]`: display help for `[cmd]`
 
 Run `lcap <command> --help` for detailed usage of given command.
