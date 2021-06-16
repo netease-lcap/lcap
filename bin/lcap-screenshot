@@ -10,6 +10,7 @@ const imageProcessor = require('../lib/imageProcessor');
 const createServer = require('../lib/createServer');
 const getPuppeteer = require('../lib/getPuppeteer');
 const configurator = require('../lib/config');
+const utils = require('../lib/utils');
 
 // 需要支持 #，所以不能用 url.pathToFileURL
 const pathToFileURL = (filePath) => 'file:///' + path.resolve(filePath).replace(/\\/g, '/');
@@ -94,8 +95,9 @@ async function screenshot({ url, selector, elNumber, maxCount, output, delay, vi
         pkg.vusion.screenshots = [];
     }
 
+    const staticUrl = await utils.getPlatformStatic();
+
     function writeIntoPackage(relativePath) {
-        const staticUrl = configurator.get('static');
         // 兼容老版，以后私有库可能有用
         const isOnNOS = pkg.scripts.deploy && pkg.scripts.deploy.includes('lcap deploy');
         const staticBaseURL = isOnNOS ? `${staticUrl}/packages` : 'https://unpkg.com';

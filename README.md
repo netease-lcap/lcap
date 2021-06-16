@@ -38,6 +38,7 @@ lcap init
 - `publish <version>`: Publish a new version
 - `screenshot <url|local-file>`: Take a screenshot of a web page
 - `deploy`: Push files to NOS static bucket
+- `usage`: Generate usage.json from api.yaml, screenshot and docs
 - `readme`: Generate final readable README.md from api.yaml and docs
 - `vetur`: Generate tags.json and attributes.json for Vetur
 - `help [cmd]`: display help for `[cmd]`

@@ -6,7 +6,8 @@ const semver = require('semver');
 const chalk = require('chalk');
 const inquirer = require('inquirer');
 const vusion = require('vusion-api');
-const configurator = require('../lib/config');
+// const configurator = require('../lib/config');
+const utils = require('../lib/utils');
 const cli = vusion.cli;
 
 const cwd = process.cwd();
@@ -17,6 +18,15 @@ if (!fs.existsSync(pkgPath)) {
     process.exit(1);
 }
 let pkg = require(pkgPath);
+
+const usagePath = path.resolve(cwd, 'usage.json');
+if (!fs.existsSync(usagePath)) {
+    console.error('[ERROR] Not contain usage.json');
+    console.error('Please check prepublishOnly cmd');
+    process.exit(1);
+}
+
+const usage = require(usagePath);
 
 /**
  * Parse Commands
@@ -34,16 +44,10 @@ program
 const name = pkg.name;
 const currentVersion = pkg.version;
 let version = program.args[0] && semver.clean(program.args[0]);
-const config = configurator.load();
+// const config = configurator.load();
 
-const manager = program.manager || config.publish_manager;
-const registry = program.registry || config.registries[config.publish_manager];
-
-const ACCESS_MAP = {
-    public: 1,
-    private: 2,
-    team: 3,
-};
+// const manager = program.manager || config.publish_manager;
+// const registry = program.registry || config.registries[config.publish_manager];
 
 async function publish() {
     console.info(`  Package ${chalk.yellow(name)}`);
@@ -83,101 +87,202 @@ async function publish() {
 
     pkg.version = version;
 
-    const npmCmds = [`${/^win/.test(process.platform) ? manager + '.cmd' : manager} publish`];
-    if (program.tag)
-        npmCmds.push(`--tag ${program.tag}`);
+    // const npmCmds = [`${/^win/.test(process.platform) ? manager + '.cmd' : manager} publish`];
+    // if (program.tag)
+    //     npmCmds.push(`--tag ${program.tag}`);
 
-    if (program.access)
-        npmCmds.push(`--access ${program.access}`);
-    else if (pkg.name.includes('/'))
-        npmCmds.push(`--access public`);
+    // if (program.access)
+    //     npmCmds.push(`--access ${program.access}`);
+    // else if (pkg.name.includes('/'))
+    //     npmCmds.push(`--access public`);
 
-    if (program.registry)
-        npmCmds.push(`--registry ${registry}`);
+    // if (program.registry)
+    //     npmCmds.push(`--registry ${registry}`);
 
     try {
         if (pkg.vusion && (pkg.vusion.type === 'component' || pkg.vusion.type === 'block' || pkg.vusion.type === 'template')) {
-            await vusion.ms.getBlocks(); // 判断网络是否 OK
-
             if (pkg.vusion.type !== 'template') {
                 // 兼容老版，以后私有库可能有用
-                const isOnNOS = pkg.scripts.deploy && pkg.scripts.deploy.includes('vusion deploy');
-                let staticBaseURL = isOnNOS ? 'https://static-vusion.163yun.com/packages' : 'https://unpkg.com';
+                const isOnNOS = pkg.scripts.deploy && pkg.scripts.deploy.includes('lcap deploy');
+                const staticUrl = await utils.getPlatformStatic();
+                let staticBaseURL = isOnNOS ? staticUrl : 'https://unpkg.com';
                 staticBaseURL += `/${pkg.name}@${pkg.version}`;
-                // if (registry.starsWith('https://registry.npmjs.org'))
                 pkg.homepage = isOnNOS ? `${staticBaseURL}/index.html` : `${staticBaseURL}/public/index.html`;
-            }
-
-            let repository = pkg.repository || '';
-            if (typeof pkg.repository === 'object')
-                repository = repository.url.replace(/\.git$/, '') + (pkg.repository.directory ? '/tree/master/' + pkg.repository.directory : '');
-            else if (!pkg.repository.startsWith('http'))
-                repository = 'https://github.com/' + pkg.repository;
-
-            if (pkg.vusion.team) {
-                const result = await vusion.ms.teamExist(pkg.vusion.team);
-                if (!result) {
-                    cli.error(`You are not in team '${pkg.vusion.team}'!`);
-                    process.exit(1);
-                }
             }
 
             await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
 
-            !program.skipNpm && await cli.exec(npmCmds.join(' ')); // prepublishOnly
+            // Only handle nos
+            // !program.skipNpm && await cli.exec(npmCmds.join(' ')); // prepublishOnly
 
             console.info();
             cli.done('Successfully published!');
 
             pkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
 
-            let publishFunc;
-            let blocks;
-            if (pkg.vusion.type === 'component') {
-                publishFunc = vusion.ms.publishComponent;
+            const { symbol, version, jsonSchema, depDescription, labels, screenShot } = usage;
+            // format majorVersion / minorVersion
+            const [majorVersion, ...minorVersion] = version.split('.');
+            // format screenShot
+            const fnScreenShot = Array.isArray(screenShot) ? screenShot.join(',') : screenShot;
+            // format JsonSchema
+            const fnJsonSchema = typeof jsonSchema === 'string' ? JSON.parse(jsonSchema) : (jsonSchema || {
+                attrs: [],
+                slots: [],
+                blocks: [],
+                events: [],
+                children: [],
+            });
+            if (!fnJsonSchema.attrs) {
+                fnJsonSchema.attrs = [];
+            }
+            if (!fnJsonSchema.slots) {
+                fnJsonSchema.slots = [];
+            }
+            if (!fnJsonSchema.blocks) {
+                fnJsonSchema.blocks = JSON.stringify([]);
+            } else if (typeof fnJsonSchema.blocks !== 'string') {
+                fnJsonSchema.blocks = JSON.stringify(fnJsonSchema.blocks);
+            }
+            if (!fnJsonSchema.screenShot) {
+                fnJsonSchema.screenShot = fnScreenShot;
+            } else if (Array.isArray(fnJsonSchema.screenShot)) {
+                fnJsonSchema.screenShot = fnJsonSchema.screenShot.join(',');
+            }
+            if (!fnJsonSchema.name) {
+                fnJsonSchema.name = symbol;
+            }
+            if (!fnJsonSchema.title) {
+                fnJsonSchema.title = usage.name;
+            }
+            if (!fnJsonSchema.description) {
+                fnJsonSchema.description = usage.description;
+            }
+            if (!fnJsonSchema.events) {
+                fnJsonSchema.events = [];
+            }
+            if (!fnJsonSchema.children) {
+                fnJsonSchema.children = [];
+            }
+            // format depDescription
+            let fnDepDescription;
+            if (!depDescription) {
+                fnDepDescription = JSON.stringify([]);
+            } else if (!Array.isArray(depDescription)) {
+                fnDepDescription = JSON.stringify(Object.values(depDescription));
+            } else if (typeof depDescription !== 'string') {
+                fnDepDescription = JSON.stringify(depDescription);
+            }
+            // format labels
+            let fnLabels = labels;
+            if (!Array.isArray(labels)) {
+                fnLabels = [labels].filter((i) => i);
+            }
+            // format platformVersion
+            const platformVersion = '1';
+            const model = {
+                symbol,
+                name: usage.name,
+                description: usage.description,
+                icon: usage.icon,
+                jsonSchema: JSON.stringify(fnJsonSchema),
+                manual: usage.manual || '',
+                document: usage.homepage || '',
+                updateLog: usage.updateLog || '',
+                repoAddr: usage.repoAddr || '',
+                industry: usage.industry || '',
+                scenes: usage.scenes || fnJsonSchema.category,
+                screenShot: fnScreenShot,
+                labels: fnLabels,
+                scope: usage.scope || 'pc',
+                depDescription: fnDepDescription,
+                majorVersion,
+                minorVersion: minorVersion.join('.'),
+                downloadMethod: usage.downloadMethod || 'npm',
+                type: 'extendComponent',
+                subType: '',
+                platformVersion,
+            };
 
-                // 'lcap screenshot public/index.html#blocks --code-example --max-count 10 --smart-crop --package'
-                const screenshotScript = pkg.scripts.screenshot;
-                if (screenshotScript && screenshotScript.includes('--code-example')) {
-                    const cap = screenshotScript.match(/(?:--max-count|-m)\s+(\d+)/);
-                    const maxCount = cap ? +cap[1] : 10;
-                    const vueFile = new vusion.VueFile(cwd);
-                    const cap2 = screenshotScript.match(/public\/index\.html#(.+?)\s/);
-                    await vueFile.open();
-                    await vueFile.loadExamples(cap2 ? cap2[1] + '.md' : undefined);
-                    // const apiHandler = vueFile.parseAPI();
-                    const examplesHandler = vueFile.parseExamples();
-                    blocks = examplesHandler && JSON.stringify(examplesHandler.toJSON().slice(0, maxCount));
-                }
-            } else if (pkg.vusion.type === 'block')
-                publishFunc = vusion.ms.publishBlock;
-            else if (pkg.vusion.type === 'template')
-                publishFunc = vusion.ms.publishTemplate;
+            const pfAxios = await utils.getPlatformAxios();
+            const authorization = await utils.getAuthorization();
+            const { data = {} } = await pfAxios.get('/api/v1/assetdsl/unpub/list', {
+                params: {
+                    platformVersion,
+                    symbol,
+                },
+                headers: {
+                    Cookie: `authorization=${authorization}`,
+                },
+            }) || {};
+            const { result } = data;
+            if (result.count) {
+                await pfAxios.post('/api/v1/assetdsl/update', {
+                    symbol: model.symbol,
+                    name: model.name,
+                    description: model.description,
+                    type: model.type,
+                    subType: model.subType,
+                    platformVersion: model.platformVersion,
+                    jsonSchema: model.jsonSchema,
+                    depDescription: model.depDescription,
+                    dsl: model.dsl,
+                }, {
+                    headers: {
+                        Cookie: `authorization=${authorization}`,
+                    },
+                });
+            } else {
+                await pfAxios.post('/api/v1/assetdsl/add', {
+                    symbol: model.symbol,
+                    editName: model.name,
+                    editDesc: model.description,
+                    editType: model.type,
+                    editSubType: model.subType,
+                    platformVersion: model.platformVersion,
+                    jsonSchema: model.jsonSchema,
+                    depDescription: model.depDescription,
+                    dsl: model.dsl,
+                }, {
+                    headers: {
+                        Cookie: `authorization=${authorization}`,
+                    },
+                });
+            }
+            await pfAxios.post('/api/v1/assetdsl/publish', {
+                symbol: model.symbol,
+                name: model.name,
+                description: model.description,
+                icon: model.icon,
+                type: model.type,
+                industry: model.industry,
+                scenes: model.scenes,
+                scope: model.scope,
+                publishPlatformVersion: model.platformVersion,
+                publishMajorVersion: model.majorVersion,
+                publishMinorVersion: model.minorVersion,
+                screenShot: model.screenShot,
+                downloadMethod: model.downloadMethod,
+                labels: model.labels,
+                manual: model.manual,
+                document: model.document,
+                updateLog: model.updateLog,
+                repoAddr: model.repoAddr,
+            }, {
+                headers: {
+                    Cookie: `authorization=${authorization}`,
+                },
+            });
 
-            await publishFunc(Object.assign({}, pkg, {
-                // homepage,
-                repository,
-                labels: pkg.keywords && pkg.keywords.join(','),
-                title: pkg.vusion.title || pkg.title,
-                description: pkg.vusion.description || pkg.description,
-                category: pkg.vusion.category,
-                access: ACCESS_MAP[pkg.vusion.access],
-                blocks,
-                screenshots: pkg.vusion.screenshots && pkg.vusion.screenshots.slice(0, 12).join(','),
-                base: pkg.vusion.base || 'vue',
-                ui: pkg.vusion.ui || 'cloud-ui.vusion',
-                registry,
-                team: pkg.vusion.team,
-                dependencies: JSON.stringify(pkg.dependencies),
-                vusionDependencies: JSON.stringify(pkg.vusionDependencies),
-            }));
-            cli.done('Registered package on lcap platform.');
+            cli.done('Successfully registered package on lcap platform.');
+            console.info();
 
             if (pkg.scripts.deploy)
                 await cli.exec('npm run deploy');
         } else { // 普通 publish
             await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
-            !program.skipNpm && await cli.exec(npmCmds.join(' ')); // prepublishOnly
+            // Only handle nos
+            // !program.skipNpm && await cli.exec(npmCmds.join(' ')); // prepublishOnly
 
             console.info();
             cli.done('Successfully published!');
