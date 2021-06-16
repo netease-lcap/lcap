@@ -103,8 +103,9 @@ async function publish() {
 
             await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
 
-            if (pkg.scripts.usage)
-                await cli.exec('npm run usage');
+            // run prepublishOnly after version updated
+            if (pkg.scripts.prepublishOnly)
+                await cli.exec('npm run prepublishOnly');
 
             const usagePath = path.resolve(cwd, 'usage.json');
             if (!fs.existsSync(usagePath)) {
