@@ -19,15 +19,6 @@ if (!fs.existsSync(pkgPath)) {
 }
 let pkg = require(pkgPath);
 
-const usagePath = path.resolve(cwd, 'usage.json');
-if (!fs.existsSync(usagePath)) {
-    console.error('[ERROR] Not contain usage.json');
-    console.error('Please check prepublishOnly cmd');
-    process.exit(1);
-}
-
-const usage = require(usagePath);
-
 /**
  * Parse Commands
  */
@@ -111,6 +102,17 @@ async function publish() {
             }
 
             await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+
+            if (pkg.scripts.usage)
+                await cli.exec('npm run usage');
+
+            const usagePath = path.resolve(cwd, 'usage.json');
+            if (!fs.existsSync(usagePath)) {
+                console.error('[ERROR] Not contain usage.json');
+                console.error('Please check prepublishOnly cmd');
+                process.exit(1);
+            }
+            const usage = JSON.parse(await fs.readFile(usagePath, 'utf8'));
 
             // Only handle nos
             // !program.skipNpm && await cli.exec(npmCmds.join(' ')); // prepublishOnly
