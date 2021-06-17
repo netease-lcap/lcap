@@ -118,9 +118,6 @@ async function publish() {
             // Only handle nos
             // !program.skipNpm && await cli.exec(npmCmds.join(' ')); // prepublishOnly
 
-            console.info();
-            cli.done('Successfully published!');
-
             pkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
 
             const { symbol, version, jsonSchema, depDescription, labels, screenShot } = usage;
@@ -282,6 +279,9 @@ async function publish() {
 
             if (pkg.scripts.deploy)
                 await cli.exec('npm run deploy');
+
+            console.info();
+            cli.done('Successfully published!');
         } else { // 普通 publish
             await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
             // Only handle nos
