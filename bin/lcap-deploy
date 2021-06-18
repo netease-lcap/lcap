@@ -15,6 +15,7 @@ program
     .usage('[source]')
     .description(`Push files to NOS static bucket. Defaults to 'public'`)
     .option('--framework <framework>', `publish framework`)
+    .option('--platform <platform>', `publish platform`)
     .option('-v, --version-level <version-level>', `Specify the minimum version level after '@'. 'major', 'minor', 'patch'`, 'patch')
     .option('-n, --name <name>', `Custom package name`)
     .option('-V, --version <packageVersion>', `Custom package version`)
@@ -29,6 +30,7 @@ if (!fs.existsSync(source)) {
     process.exit(1);
 }
 // const isFramework = !!program.framework;
+const platform = program.platform;
 const pkgPath = path.resolve(process.cwd(), 'package.json');
 if (!fs.existsSync(pkgPath)) {
     console.error('[ERROR] Not a npm package');
@@ -70,4 +72,4 @@ formFiles = formFiles.map((filePath) => {
     return { name: relativePath, path: filePath };
 });
 
-upload(formFiles);
+upload(formFiles, platform);
