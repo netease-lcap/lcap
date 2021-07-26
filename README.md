@@ -1,4 +1,4 @@
-# Lcap
+# Lcap-min
 
 CLI for developing Lcap Projects.
 
@@ -19,7 +19,7 @@ CLI for developing Lcap Projects.
 ## Install
 
 ``` shell
-npm install -g lcap
+npm install -g lcap-min
 ```
 
 ## Quick Start
@@ -36,7 +36,6 @@ lcap init
 - `init <type> <name>`: Initialize a material
 - `config <action> <key> [value]`: Configure CLI options
 - `publish <version>`: Publish a new version
-- `screenshot <url|local-file>`: Take a screenshot of a web page
 - `deploy`: Push files to NOS static bucket
 - `usage`: Generate usage.json from api.yaml, screenshot and docs
 - `readme`: Generate final readable README.md from api.yaml and docs
