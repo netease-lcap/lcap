@@ -67,8 +67,8 @@ if (!formFiles.length) {
 }
 
 formFiles = formFiles.map((filePath) => {
-    let relativePath = path.relative(cwd, filePath).replace(/^public[\\/]/, '');
-    relativePath = path.join(prefix, relativePath);
+    let relativePath = path.posix.relative(cwd, filePath).replace(/^public[\\/]/, '');
+    relativePath = path.posix.join(prefix, relativePath);
     return { name: relativePath, path: filePath };
 });
 
