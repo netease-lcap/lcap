@@ -4,7 +4,6 @@ const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
 const vusion = require('vusion-api');
-const os = require('os');
 const upload = require('../lib/upload');
 const cli = vusion.cli;
 
@@ -32,7 +31,7 @@ if (!fs.existsSync(source)) {
 }
 // const isFramework = !!program.framework;
 const platform = program.platform;
-const pkgPath = path.posix.resolve(cwd, 'package.json');
+const pkgPath = path.resolve(cwd, 'package.json');
 if (!fs.existsSync(pkgPath)) {
     console.error('[ERROR] Not a npm package');
     console.error('Please locate into a npm package source.');
@@ -68,12 +67,7 @@ if (!formFiles.length) {
 }
 
 formFiles = formFiles.map((filePath) => {
-    let relativePath;
-    if (os.platform() === 'win32') {
-        relativePath = filePath.replace(/^public[\\/]/, '');
-    } else {
-        relativePath = path.posix.relative(cwd, filePath).replace(/^public[\\/]/, '');
-    }
+    let relativePath = path.relative(cwd, filePath).replace(/^public[\\/]/, '').replace(/\\/g, '/');
     relativePath = path.posix.join(prefix, relativePath);
     return { name: relativePath, path: filePath };
 });
