@@ -28,7 +28,7 @@ const config = configurator.load();
 let [action, key, value, url] = program.args;
 
 if (action === 'set') {
-    if (key === 'platform')
+    if (key === 'platform' || key === 'bucket')
         value = value.replace(/\/$/, '');
 
     config[key] = value;
