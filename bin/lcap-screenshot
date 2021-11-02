@@ -42,7 +42,10 @@ For example:
     .option('--smart-crop [margin]', 'Crop image transparent or white margin cleanly. Value is margin 20 by default')
     .option('--dsf <device-scale-factor>', 'Specify device scale factor (can be thought of as dpr). Defaults to 2', parseInt, 2)
     .option('--package [package-path]', 'Autoset package.json screenshots')
+    .option('--platform <platform>', `Screenshot platform`)
     .parse(process.argv);
+
+let staticUrl = program.platform;
 
 /**
  * Take a screenshot with local server
@@ -95,14 +98,12 @@ async function screenshot({ url, selector, elNumber, maxCount, output, delay, vi
         pkg.vusion.screenshots = [];
     }
 
-    const staticUrl = await utils.getPlatformStatic();
+    if (!staticUrl) {
+        staticUrl = await utils.getPlatformStatic();
+    }
 
     function writeIntoPackage(relativePath) {
-        // 兼容老版，以后私有库可能有用
-        const isOnNOS = pkg.scripts.deploy && pkg.scripts.deploy.includes('lcap deploy');
-        const staticBaseURL = isOnNOS ? `${staticUrl}/packages` : 'https://unpkg.com';
-        const finalPath = `${staticBaseURL}/${pkg.name}@${pkg.version}/${relativePath}`;
-        // if (!screenshots.includes(finalPath))
+        const finalPath = `${staticUrl.replace(/\/$/, '')}/packages/${pkg.name}@${pkg.version}/${relativePath}`;
         pkg.vusion.screenshots.push(finalPath);
     }
 

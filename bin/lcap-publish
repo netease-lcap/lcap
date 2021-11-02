@@ -94,11 +94,8 @@ async function publish() {
         if (pkg.vusion && (pkg.vusion.type === 'component' || pkg.vusion.type === 'block' || pkg.vusion.type === 'template')) {
             if (pkg.vusion.type !== 'template') {
                 // 兼容老版，以后私有库可能有用
-                const isOnNOS = pkg.scripts.deploy && pkg.scripts.deploy.includes('lcap deploy');
                 const staticUrl = await utils.getPlatformStatic();
-                let staticBaseURL = isOnNOS ? staticUrl : 'https://unpkg.com';
-                staticBaseURL += `/${pkg.name}@${pkg.version}`;
-                pkg.homepage = isOnNOS ? `${staticBaseURL}/index.html` : `${staticBaseURL}/public/index.html`;
+                pkg.homepage = `${staticUrl}/${pkg.name}@${pkg.version}/index.html`;
             }
 
             await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n');

@@ -11,16 +11,20 @@ program
     .usage('<dest>')
     .description(`Generate usage json`)
     .option('-t, --type <type>', 'type', 'component')
+    .option('--platform <platform>', `Usage platform`)
     .parse(process.argv);
 
+let staticUrl = program.platform;
 (async function () {
-    const staticUrl = await utils.getPlatformStatic();
+    if (!staticUrl) {
+        staticUrl = await utils.getPlatformStatic();
+    }
     const usage = getUsage(root);
     if (program.type === 'component') {
         const packageJSON = require(path.resolve('./package.json'));
         const libInfo = `${packageJSON.name}@${packageJSON.version}`;
         let screenShot = JSON.parse(usage.screenShot);
-        screenShot = screenShot.map((screen) => `${staticUrl}/packages/${libInfo}/screenshots/${screen}`);
+        screenShot = screenShot.map((screen) => `${staticUrl.replace(/\/$/, '')}/packages/${libInfo}/screenshots/${screen}`);
         usage.jsonSchema.screenShot = usage.screenShot = screenShot.join(',');
     }
 
