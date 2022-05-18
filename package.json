@@ -9,9 +9,9 @@
   "scripts": {
     "test": "mocha test/**/*.test.js"
   },
-  "repository": "vusion/lcap",
+  "repository": "netease-lcap/lcap",
   "homepage": "https://vusion.github.io",
-  "bugs": "https://github.com/vusion/lcap/issues",
+  "bugs": "https://github.com/netease-lcap/lcap/issues",
   "keywords": [
     "lcap",
     "cli",
