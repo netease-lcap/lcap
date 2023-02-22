@@ -203,48 +203,51 @@ async function publish() {
 
             const pfAxios = await utils.getPlatformAxios();
             const authorization = await utils.getAuthorization();
-            const { data = {} } = await pfAxios.get('/api/v1/assetdsl/unpub/list', {
-                params: {
-                    platformVersion,
-                    symbol,
-                },
-                headers: {
-                    Cookie: `authorization=${authorization}`,
-                },
-            }) || {};
-            const { result } = data;
-            if (result.count) {
-                await pfAxios.post('/api/v1/assetdsl/update', {
-                    symbol: model.symbol,
-                    name: model.name,
-                    description: model.description,
-                    type: model.type,
-                    subType: model.subType,
-                    platformVersion: model.platformVersion,
-                    jsonSchema: model.jsonSchema,
-                    depDescription: model.depDescription,
-                    dsl: model.dsl,
-                }, {
+            const apiVersion = configurator.get('api_version') || 'v2';
+            if (apiVersion === 'v1') {
+                const { data = {} } = await pfAxios.get('/api/v1/assetdsl/unpub/list', {
+                    params: {
+                        platformVersion,
+                        symbol,
+                    },
                     headers: {
                         Cookie: `authorization=${authorization}`,
                     },
-                });
-            } else {
-                await pfAxios.post('/api/v1/assetdsl/add', {
-                    symbol: model.symbol,
-                    editName: model.name,
-                    editDesc: model.description,
-                    editType: model.type,
-                    editSubType: model.subType,
-                    platformVersion: model.platformVersion,
-                    jsonSchema: model.jsonSchema,
-                    depDescription: model.depDescription,
-                    dsl: model.dsl,
-                }, {
-                    headers: {
-                        Cookie: `authorization=${authorization}`,
-                    },
-                });
+                }) || {};
+                const { result } = data;
+                if (result.count) {
+                    await pfAxios.post('/api/v1/assetdsl/update', {
+                        symbol: model.symbol,
+                        name: model.name,
+                        description: model.description,
+                        type: model.type,
+                        subType: model.subType,
+                        platformVersion: model.platformVersion,
+                        jsonSchema: model.jsonSchema,
+                        depDescription: model.depDescription,
+                        dsl: model.dsl,
+                    }, {
+                        headers: {
+                            Cookie: `authorization=${authorization}`,
+                        },
+                    });
+                } else {
+                    await pfAxios.post('/api/v1/assetdsl/add', {
+                        symbol: model.symbol,
+                        editName: model.name,
+                        editDesc: model.description,
+                        editType: model.type,
+                        editSubType: model.subType,
+                        platformVersion: model.platformVersion,
+                        jsonSchema: model.jsonSchema,
+                        depDescription: model.depDescription,
+                        dsl: model.dsl,
+                    }, {
+                        headers: {
+                            Cookie: `authorization=${authorization}`,
+                        },
+                    });
+                }
             }
             const v1Body = {
                 symbol: model.symbol,
@@ -279,7 +282,6 @@ async function publish() {
                 picture: model.screenShot,
                 manual: model.manual,
             };
-            const apiVersion = configurator.get('api_version') || 'v2';
             const assetdslServer = apiVersion === 'v2' ? '/api/v1/asset-center/component/publish' : '/api/v1/assetdsl/publish';
             const assetdslBody = apiVersion === 'v2' ? v2Body : v1Body;
             await pfAxios.post(assetdslServer, assetdslBody, {
