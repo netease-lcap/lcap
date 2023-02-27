@@ -248,47 +248,49 @@ async function publish() {
                         },
                     });
                 }
+                await pfAxios.post('/api/v1/assetdsl/publish', {
+                    symbol: model.symbol,
+                    name: model.name,
+                    description: model.description,
+                    icon: model.icon,
+                    type: model.type,
+                    industry: model.industry,
+                    scenes: model.scenes,
+                    scope: model.scope,
+                    publishPlatformVersion: model.platformVersion,
+                    publishMajorVersion: model.majorVersion,
+                    publishMinorVersion: model.minorVersion,
+                    screenShot: model.screenShot,
+                    downloadMethod: model.downloadMethod,
+                    labels: model.labels,
+                    manual: model.manual,
+                    document: model.document,
+                    updateLog: model.updateLog,
+                    repoAddr: model.repoAddr,
+                }, {
+                    headers: {
+                        Cookie: `authorization=${authorization}`,
+                    }
+                });
+            } else {
+                await pfAxios.post('/api/v1/asset-center/component/publish', {
+                    symbol: model.symbol,
+                    name: model.name,
+                    description: model.description,
+                    icon: model.icon,
+                    type: 'extend',
+                    industry: model.industry,
+                    scenes: model.scenes,
+                    jsonSchema: model.jsonSchema,
+                    version: `${model.majorVersion}.${model.minorVersion}`,
+                    picture: model.screenShot,
+                    manual: model.manual,
+                }, {
+                    headers: {
+                        Cookie: `authorization=${authorization}`,
+                    },
+                });
             }
-            const v1Body = {
-                symbol: model.symbol,
-                name: model.name,
-                description: model.description,
-                icon: model.icon,
-                type: model.type,
-                industry: model.industry,
-                scenes: model.scenes,
-                scope: model.scope,
-                publishPlatformVersion: model.platformVersion,
-                publishMajorVersion: model.majorVersion,
-                publishMinorVersion: model.minorVersion,
-                screenShot: model.screenShot,
-                downloadMethod: model.downloadMethod,
-                labels: model.labels,
-                manual: model.manual,
-                document: model.document,
-                updateLog: model.updateLog,
-                repoAddr: model.repoAddr,
-            };
-            const v2Body = {
-                symbol: model.symbol,
-                name: model.name,
-                description: model.description,
-                icon: model.icon,
-                type: 'extend',
-                industry: model.industry,
-                scenes: model.scenes,
-                jsonSchema: model.jsonSchema,
-                version: `${model.majorVersion}.${model.minorVersion}`,
-                picture: model.screenShot,
-                manual: model.manual,
-            };
-            const assetdslServer = apiVersion === 'v2' ? '/api/v1/asset-center/component/publish' : '/api/v1/assetdsl/publish';
-            const assetdslBody = apiVersion === 'v2' ? v2Body : v1Body;
-            await pfAxios.post(assetdslServer, assetdslBody, {
-                headers: {
-                    Cookie: `authorization=${authorization}`,
-                },
-            });
             cli.done('Successfully registered package on lcap platform.');
             console.info();
 
