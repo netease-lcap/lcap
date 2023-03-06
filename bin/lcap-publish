@@ -6,7 +6,7 @@ const semver = require('semver');
 const chalk = require('chalk');
 const inquirer = require('inquirer');
 const vusion = require('vusion-api');
-// const configurator = require('../lib/config');
+const configurator = require('../lib/config');
 const utils = require('../lib/utils');
 const cli = vusion.cli;
 
@@ -203,74 +203,94 @@ async function publish() {
 
             const pfAxios = await utils.getPlatformAxios();
             const authorization = await utils.getAuthorization();
-            const { data = {} } = await pfAxios.get('/api/v1/assetdsl/unpub/list', {
-                params: {
-                    platformVersion,
-                    symbol,
-                },
-                headers: {
-                    Cookie: `authorization=${authorization}`,
-                },
-            }) || {};
-            const { result } = data;
-            if (result.count) {
-                await pfAxios.post('/api/v1/assetdsl/update', {
-                    symbol: model.symbol,
-                    name: model.name,
-                    description: model.description,
-                    type: model.type,
-                    subType: model.subType,
-                    platformVersion: model.platformVersion,
-                    jsonSchema: model.jsonSchema,
-                    depDescription: model.depDescription,
-                    dsl: model.dsl,
-                }, {
+            const apiVersion = configurator.get('api_version') || 'v2';
+            if (apiVersion === 'v1') {
+                const { data = {} } = await pfAxios.get('/api/v1/assetdsl/unpub/list', {
+                    params: {
+                        platformVersion,
+                        symbol,
+                    },
                     headers: {
                         Cookie: `authorization=${authorization}`,
                     },
+                }) || {};
+                const { result } = data;
+                if (result.count) {
+                    await pfAxios.post('/api/v1/assetdsl/update', {
+                        symbol: model.symbol,
+                        name: model.name,
+                        description: model.description,
+                        type: model.type,
+                        subType: model.subType,
+                        platformVersion: model.platformVersion,
+                        jsonSchema: model.jsonSchema,
+                        depDescription: model.depDescription,
+                        dsl: model.dsl,
+                    }, {
+                        headers: {
+                            Cookie: `authorization=${authorization}`,
+                        },
+                    });
+                } else {
+                    await pfAxios.post('/api/v1/assetdsl/add', {
+                        symbol: model.symbol,
+                        editName: model.name,
+                        editDesc: model.description,
+                        editType: model.type,
+                        editSubType: model.subType,
+                        platformVersion: model.platformVersion,
+                        jsonSchema: model.jsonSchema,
+                        depDescription: model.depDescription,
+                        dsl: model.dsl,
+                    }, {
+                        headers: {
+                            Cookie: `authorization=${authorization}`,
+                        },
+                    });
+                }
+                await pfAxios.post('/api/v1/assetdsl/publish', {
+                    symbol: model.symbol,
+                    name: model.name,
+                    description: model.description,
+                    icon: model.icon,
+                    type: model.type,
+                    industry: model.industry,
+                    scenes: model.scenes,
+                    scope: model.scope,
+                    publishPlatformVersion: model.platformVersion,
+                    publishMajorVersion: model.majorVersion,
+                    publishMinorVersion: model.minorVersion,
+                    screenShot: model.screenShot,
+                    downloadMethod: model.downloadMethod,
+                    labels: model.labels,
+                    manual: model.manual,
+                    document: model.document,
+                    updateLog: model.updateLog,
+                    repoAddr: model.repoAddr,
+                }, {
+                    headers: {
+                        Cookie: `authorization=${authorization}`,
+                    }
                 });
             } else {
-                await pfAxios.post('/api/v1/assetdsl/add', {
+                await pfAxios.post('/api/v1/asset-center/component/publish', {
                     symbol: model.symbol,
-                    editName: model.name,
-                    editDesc: model.description,
-                    editType: model.type,
-                    editSubType: model.subType,
-                    platformVersion: model.platformVersion,
+                    name: model.name,
+                    description: model.description,
+                    icon: model.icon,
+                    type: 'extend',
+                    industry: model.industry,
+                    scenes: model.scenes,
                     jsonSchema: model.jsonSchema,
-                    depDescription: model.depDescription,
-                    dsl: model.dsl,
+                    version: `${model.majorVersion}.${model.minorVersion}`,
+                    picture: model.screenShot,
+                    manual: model.manual,
                 }, {
                     headers: {
                         Cookie: `authorization=${authorization}`,
                     },
                 });
             }
-            await pfAxios.post('/api/v1/assetdsl/publish', {
-                symbol: model.symbol,
-                name: model.name,
-                description: model.description,
-                icon: model.icon,
-                type: model.type,
-                industry: model.industry,
-                scenes: model.scenes,
-                scope: model.scope,
-                publishPlatformVersion: model.platformVersion,
-                publishMajorVersion: model.majorVersion,
-                publishMinorVersion: model.minorVersion,
-                screenShot: model.screenShot,
-                downloadMethod: model.downloadMethod,
-                labels: model.labels,
-                manual: model.manual,
-                document: model.document,
-                updateLog: model.updateLog,
-                repoAddr: model.repoAddr,
-            }, {
-                headers: {
-                    Cookie: `authorization=${authorization}`,
-                },
-            });
-
             cli.done('Successfully registered package on lcap platform.');
             console.info();
 
