@@ -5,33 +5,23 @@ const chalk = require('chalk');
 const init = require('../lib/init');
 const utils = require('../lib/utils');
 
-function getMessage(type) {
+function getMessage() {
     return `Please input a package name.
-    It will also be used as the ${type} name and file name.
-    For examples: ${chalk.cyan('custom-button')}
+    It will also be used as file name.
+    For examples: ${chalk.cyan('library_example')}
     `;
 }
 
 const { argv } = process;
 (async function () {
     if (argv.length <= 2) {
-        const { type } = await inquirer.prompt([{
-            type: 'list',
-            name: 'type',
-            message: 'Select a material type',
-            choices: [
-                {
-                    name: 'component' + chalk.gray(' - Initialize a vusion custom component'),
-                    value: 'component',
-                },
-            ],
-        }]);
+        const type = 'component';
 
         const { name } = await inquirer.prompt([
             {
                 type: 'input',
                 name: 'name',
-                message: getMessage(type),
+                message: getMessage(),
                 default: undefined,
                 validate(name) {
                     return !!name;

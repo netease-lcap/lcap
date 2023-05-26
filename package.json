@@ -9,6 +9,9 @@
   "scripts": {
     "test": "mocha test/**/*.test.js"
   },
+  "files": [
+    "plop-templates"
+  ],
   "repository": "netease-lcap/lcap",
   "homepage": "https://vusion.github.io",
   "bugs": "https://github.com/netease-lcap/lcap/issues",
@@ -52,6 +55,7 @@
     "mime-types": "^2.1.31",
     "node-notifier": "^5.2.1",
     "ora": "^4.0.3",
+    "plop": "2.7.6",
     "semver": "^5.5.0",
     "shelljs": "^0.8.2",
     "update-notifier": "^2.5.0",
