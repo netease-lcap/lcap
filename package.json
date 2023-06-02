@@ -1,7 +1,7 @@
 {
   "name": "lcap",
   "description": "CLI for Lcap Projects, including Application and UI Library.",
-  "version": "0.2.0-beta",
+  "version": "0.2.0-beta-1",
   "author": "daysai <wddpwzz36@gmail.com>",
   "bin": {
     "lcap": "bin/lcap"
@@ -9,9 +9,6 @@
   "scripts": {
     "test": "mocha test/**/*.test.js"
   },
-  "files": [
-    "plop-templates"
-  ],
   "repository": "netease-lcap/lcap",
   "homepage": "https://vusion.github.io",
   "bugs": "https://github.com/netease-lcap/lcap/issues",
