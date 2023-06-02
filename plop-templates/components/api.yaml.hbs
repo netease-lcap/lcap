@@ -13,12 +13,10 @@
     - name: default
       description: 插入文本或 HTML。
   events:
-    - name: change
-      description: 修改时触发
+    - name: click
+      title: 点击时触发
+      description: 点击时触发
       params:
         - name: $event.param1
           type: string
           description: 参数1
-        - name: $event.param2
-          type: number
-          description: 参数2

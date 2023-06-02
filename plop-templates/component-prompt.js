@@ -4,12 +4,12 @@ const { upperFirst, camelCase, kebabCase } = require('lodash');
 const pkg = require('../package.json');
 
 module.exports = {
-    description: '创建逻辑',
+    description: '创建组件',
     prompts: [
         {
             type: 'input',
             name: 'name',
-            message: '请输入逻辑名字',
+            message: '请输入组件名字',
             validate: (v) => {
                 if (!v || v.trim === '') {
                     return '文件名不能为空';
@@ -31,12 +31,6 @@ module.exports = {
             },
         },
         {
-            type: 'input',
-            name: 'description',
-            message: '请输入描述',
-            default: '请在这里添加描述',
-        },
-        {
             type: 'list',
             name: 'type',
             message: '请选择端',
@@ -49,7 +43,7 @@ module.exports = {
         },
     ],
     actions: (data) => {
-        const relationPath = path.resolve(__dirname, '../components');
+        const relationPath = path.resolve(process.cwd(), './components');
         const makeFileList = ['index.vue', 'index.js', 'api.yaml', 'docs/blocks.md', 'docs/examples.md'];
 
         const actions = [...makeFileList.map((item) => ({
@@ -61,15 +55,21 @@ module.exports = {
                 camelCaseName: upperFirst(camelCase(data.name)),
             },
         })), {
-            path: path.resolve(__dirname, '../index.js'),
+            path: path.resolve(process.cwd(), './index.js'),
             pattern: /(\/\/ COMPONENT IMPORTS)/g,
             template: 'import {{pascalCase name}} from \'./components/{{name}}\';\n$1',
             type: 'modify',
         },
         {
-            path: path.resolve(__dirname, '../index.js'),
+            path: path.resolve(process.cwd(), './index.js'),
             pattern: /(\/\/ COMPONENT EXPORTS)/g,
             template: '\t{{pascalCase name}},\n$1',
+            type: 'modify',
+        },
+        {
+            path: path.resolve(process.cwd(), './vusion.config.js'),
+            pattern: /(\/\/ Conponents Route List)/g,
+            template: '{ group: \'组件\', name: \'{{kebabCase name}}\',path: "./components/{{kebabCase name}}/api.yaml"},,\n            $1',
             type: 'modify',
         },
         ];

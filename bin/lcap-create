@@ -3,15 +3,21 @@ const path = require('path');
 const { Plop, run } = require('plop');
 const args = process.argv.slice(2);
 const argv = require('minimist')(args);
-Plop.launch({
-    cwd: argv.cwd,
-    configPath: path.join(__dirname, '../plopfile.js'),
-    require: argv.require,
-    completion: argv.completion,
-}, (env) => {
-    const options = {
-        ...env,
-        dest: process.cwd(),
-    };
-    run(options, undefined, true);
-});
+const fs = require('fs-extra');
+if (!fs.existsSync(path.resolve(process.cwd(), 'vusion.config.js'))) {
+    console.error(`该项目不支持`);
+} else {
+    Plop.launch({
+        cwd: argv.cwd,
+        configPath: path.join(__dirname, '../plopfile.js'),
+        require: argv.require,
+        completion: argv.completion,
+    }, (env) => {
+        const options = {
+            ...env,
+            dest: process.cwd(),
+        };
+        run(options, { }, true);
+    });
+}
+
