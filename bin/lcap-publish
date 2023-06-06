@@ -9,6 +9,7 @@ const vusion = require('vusion-api');
 const configurator = require('../lib/config');
 const utils = require('../lib/utils');
 const cli = vusion.cli;
+const querystring = require('querystring');
 
 const cwd = process.cwd();
 const pkgPath = path.resolve(cwd, 'package.json');
@@ -270,7 +271,7 @@ async function publish() {
                 }, {
                     headers: {
                         Cookie: `authorization=${authorization}`,
-                    }
+                    },
                 });
             } else {
                 await pfAxios.post('/api/v1/asset-center/component/publish', {
@@ -301,6 +302,49 @@ async function publish() {
             cli.done('Successfully published!');
         } else { // 普通 publish
             await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+            if (pkg.scripts.prepublishOnly)
+                await cli.exec('npm run prepublishOnly');
+
+            const usagePath = path.resolve(cwd, 'usage.json');
+            if (!fs.existsSync(usagePath)) {
+                console.error('[ERROR] Not contain usage.json');
+                console.error('Please check prepublishOnly cmd');
+                process.exit(1);
+            }
+            const authorization = await utils.getAuthorization();
+            const pfAxios = await utils.getPlatformAxios();
+            const usage = JSON.parse(await fs.readFile(usagePath, 'utf8'));
+            const versionList = usage.version.split('.')[0];
+            const result = await pfAxios.post('/api/v1/asset-center/library/upload', querystring.stringify({
+                symbol: usage.name,
+                name: usage.title,
+                description: usage.description,
+                majorVersion: versionList[0],
+                minorVersion: versionList[1] + '.' + versionList[2],
+                version: usage.version,
+                jsonSchema: JSON.stringify(usage, null, 2),
+                origin: 'lcap',
+            }), {
+                headers: {
+                    Cookie: `authorization=${authorization}`,
+                },
+            });
+            let answers = null;
+            if (!result.data.success) {
+                answers = await inquirer.prompt([{
+                    name: 'continue',
+                    type: 'confirm',
+                    default: false,
+                    message: `${result.data.msg},继续发布将替换当前版本资源,是否继续`,
+                }]);
+            }
+            if (!answers || answers && answers.continue) {
+                if (pkg.scripts.deploy)
+                    await cli.exec('npm run deploy');
+            } else {
+                // throw new Error('相同版本停止发布');
+            }
+
             // Only handle nos
             // !program.skipNpm && await cli.exec(npmCmds.join(' ')); // prepublishOnly
 
@@ -308,7 +352,6 @@ async function publish() {
             cli.done('Successfully published!');
         }
     } catch (e) {
-        console.info();
         cli.error('Failed to publish!');
         e && console.error(e.response ? e.response.data : e);
         process.exit(1);
