@@ -15,9 +15,8 @@ function getMessage() {
 
 const { argv } = process;
 (async function () {
+    const type = 'component';
     if (argv.length <= 2) {
-        const type = 'component';
-
         const { name } = await inquirer.prompt([
             {
                 type: 'input',
@@ -33,6 +32,18 @@ const { argv } = process;
             },
         ]);
 
+        return init({
+            type,
+            material: type,
+            name,
+            path: utils.getFileName(name),
+            access: 'public',
+            team: '',
+        }, {
+            isUser: false,
+        });
+    } else if (argv.length === 3) {
+        const name = snakeCase(argv[2]);
         return init({
             type,
             material: type,
