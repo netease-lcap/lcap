@@ -344,11 +344,8 @@ async function publish() {
             } else {
                 // throw new Error('相同版本停止发布');
             }
-
             // Only handle nos
             // !program.skipNpm && await cli.exec(npmCmds.join(' ')); // prepublishOnly
-
-            console.info();
             cli.done('Successfully published!');
         }
     } catch (e) {

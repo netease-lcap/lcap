@@ -1,22 +1,10 @@
 - name: {{dashCaseName}}
   title: {{title}}
-  description: {{description}}
   type: {{type}}
   belong: component
   labels: [Runtime]
   attrs:
     - name: value
-      type: number
-      default: 0
+      type: string
+      default: 请在这里编写代码
       description: 需要传入的值
-  slots:
-    - name: default
-      description: 插入文本或 HTML。
-  events:
-    - name: click
-      title: 点击时触发
-      description: 点击时触发
-      params:
-        - name: $event.param1
-          type: string
-          description: 参数1
