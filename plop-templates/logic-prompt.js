@@ -40,6 +40,7 @@ module.exports = {
     actions: (data) => {
         const relationPath = path.resolve(process.cwd(), './logics');
         const indexjsPath = path.resolve(relationPath, 'index.js');
+        const indexData = fs.readFileSync(path.resolve(process.cwd(), 'index.js'));
         const exist = fs.existsSync(indexjsPath);
         const actions = [];
         if (!exist) {
@@ -50,6 +51,20 @@ module.exports = {
                 data: {
                     pkgName: pkg.name,
                 },
+            });
+        }
+        if (!~indexData.indexOf('import UtilsLogics')) {
+            actions.push({
+                path: path.resolve(process.cwd(), './index.js'),
+                pattern: /(\/\/ COMPONENT EXPORTS)/g,
+                template: '\tUtilsLogics,\n$1',
+                type: 'modify',
+            });
+            actions.push({
+                path: path.resolve(process.cwd(), './index.js'),
+                pattern: /(\/\/ COMPONENT IMPORTS)/g,
+                template: 'import UtilsLogics from \'./logics\';\n$1',
+                type: 'modify',
             });
         }
         actions.push({
