@@ -1,7 +1,7 @@
 {
   "name": "lcap",
   "description": "CLI for Lcap Projects, including Application and UI Library.",
-  "version": "0.1.25",
+  "version": "0.2.1",
   "author": "daysai <wddpwzz36@gmail.com>",
   "bin": {
     "lcap": "bin/lcap"
@@ -52,6 +52,7 @@
     "mime-types": "^2.1.31",
     "node-notifier": "^5.2.1",
     "ora": "^4.0.3",
+    "plop": "2.7.6",
     "semver": "^5.5.0",
     "shelljs": "^0.8.2",
     "update-notifier": "^2.5.0",

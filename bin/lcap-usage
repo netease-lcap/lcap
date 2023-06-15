@@ -2,7 +2,7 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-const getUsage = require('../lib/usage');
+const { getUsage, getNewUsage } = require('../lib/usage');
 const utils = require('../lib/utils');
 const root = process.cwd();
 
@@ -11,21 +11,28 @@ program
     .usage('<dest>')
     .description(`Generate usage json`)
     .option('-t, --type <type>', 'type', 'component')
+    .option('-v, --version <version>', 'version', 'new')
     .option('--platform <platform>', `Usage platform`)
     .parse(process.argv);
 
 let staticUrl = program.platform;
-(async function () {
+
+(async () => {
     if (!staticUrl) {
         staticUrl = await utils.getPlatformStatic();
     }
-    const usage = getUsage(root);
-    if (program.type === 'component') {
-        const packageJSON = require(path.resolve('./package.json'));
-        const libInfo = `${packageJSON.name}@${packageJSON.version}`;
-        let screenShot = JSON.parse(usage.screenShot);
-        screenShot = screenShot.map((screen) => `${staticUrl.replace(/\/$/, '')}/packages/${libInfo}/screenshots/${screen}`);
-        usage.jsonSchema.screenShot = usage.screenShot = screenShot.join(',');
+    let usage = null;
+    if (program.version === 'new') {
+        usage = getNewUsage(root);
+    } else {
+        usage = getUsage(root);
+        if (program.type === 'component') {
+            const packageJSON = require(path.resolve('./package.json'));
+            const libInfo = `${packageJSON.name}@${packageJSON.version}`;
+            let screenShot = JSON.parse(usage.screenShot);
+            screenShot = screenShot.map((screen) => `${staticUrl.replace(/\/$/, '')}/packages/${libInfo}/screenshots/${screen}`);
+            usage.jsonSchema.screenShot = usage.screenShot = screenShot.join(',');
+        }
     }
 
     fs.writeFileSync(path.join(root, 'usage.json'), JSON.stringify(usage, null, 4));

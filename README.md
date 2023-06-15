@@ -41,6 +41,8 @@ lcap init
 - `usage`: Generate usage.json from api.yaml, screenshot and docs
 - `readme`: Generate final readable README.md from api.yaml and docs
 - `vetur`: Generate tags.json and attributes.json for Vetur
+- `create`: Generate Component and Logic
 - `help [cmd]`: display help for `[cmd]`
+
 
 Run `lcap <command> --help` for detailed usage of given command.
