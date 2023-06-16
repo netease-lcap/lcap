@@ -1,7 +1,7 @@
 {
   "name": "lcap",
   "description": "CLI for Lcap Projects, including Application and UI Library.",
-  "version": "0.2.1",
+  "version": "0.2.2-beta.2",
   "author": "daysai <wddpwzz36@gmail.com>",
   "bin": {
     "lcap": "bin/lcap"
@@ -40,8 +40,6 @@
     "gh-pages": "^1.2.0",
     "glob": "^7.1.6",
     "global-dirs": "^2.0.1",
-    "imagemin": "^7.0.1",
-    "imagemin-pngquant": "^8.0.0",
     "import-global": "^0.1.0",
     "inquirer": "^7.0.0",
     "inquirer-autocomplete-prompt": "^1.0.1",
