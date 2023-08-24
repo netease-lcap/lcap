@@ -18,12 +18,18 @@ module.exports = {
                     return true;
                 }
             },
+            filter(val) {
+                return camelCase(val).trim();
+            },
         },
         {
             type: 'input',
             name: 'description',
             message: '请输入描述',
             default: '请在这里添加描述',
+            filter(val) {
+                return val.trim();
+            },
         },
         {
             type: 'list',

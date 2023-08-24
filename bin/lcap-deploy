@@ -33,12 +33,15 @@ if (!fs.existsSync(source)) {
 }
 const { platform, bucket, username, password } = program;
 const pkgPath = path.resolve(cwd, 'package.json');
+
 if (!fs.existsSync(pkgPath)) {
     console.error('[ERROR] Not a npm package');
     console.error('Please locate into a npm package source.');
     process.exit(1);
 }
 const pkg = require(pkgPath);
+const usage = require(path.resolve(cwd, 'usage.json'));
+const prefixPath = usage?.compilerInfoMap?.js?.prefix;
 let version = program.packageVersion || pkg.version;
 if (!semver.valid(version)) {
     console.error(`Invalid version ${version}`);
@@ -49,14 +52,14 @@ if (program.versionLevel === 'major')
 else if (program.versionLevel === 'minor')
     version = version.split('.').slice(0, 2).join('.');
 
-const prefix = `packages/${typeof program.name === 'string' ? program.name : pkg.name}@${version}`;
+const prefix = `packages/${prefixPath ? prefixPath + '/' : ''}${typeof program.name === 'string' ? program.name : pkg.name}@${version}`;
 let formFiles;
 
 if (fs.statSync(source).isDirectory()) {
     formFiles = vusion.fs.listAllFiles(source, {
         type: 'file',
         dot: false,
-        patterns: ['!**/node_modules', '!**/.git'],
+        patterns: ['!**/node_modules', '!**/.git', '!public/**'],
     });
 } else {
     formFiles = [source];
@@ -72,5 +75,6 @@ formFiles = formFiles.map((filePath) => {
     relativePath = path.posix.join(prefix, relativePath);
     return { name: relativePath, path: filePath };
 });
+// console.log(formFiles, 22);
 
 upload(formFiles, { platform, bucket, username, password });

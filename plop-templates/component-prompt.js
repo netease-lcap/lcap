@@ -12,10 +12,13 @@ module.exports = {
             message: '请输入组件名字',
             validate: (v) => {
                 if (!v || v.trim === '') {
-                    return '文件名不能为空';
+                    return '组件名字不能为空';
                 } else {
                     return true;
                 }
+            },
+            filter(val) {
+                return kebabCase(val).trim();
             },
         },
         {
@@ -28,6 +31,9 @@ module.exports = {
                 } else {
                     return true;
                 }
+            },
+            filter(val) {
+                return val.trim();
             },
         },
         {

@@ -10,6 +10,7 @@ const configurator = require('../lib/config');
 const utils = require('../lib/utils');
 const cli = vusion.cli;
 const querystring = require('querystring');
+const FormData = require('form-data');
 
 const cwd = process.cwd();
 const pkgPath = path.resolve(cwd, 'package.json');
@@ -44,7 +45,6 @@ let version = program.args[0] && semver.clean(program.args[0]);
 async function publish() {
     console.info(`  Package ${chalk.yellow(name)}`);
     console.info('  Current version: ' + chalk.cyan(currentVersion));
-
     if (!version) {
         const arr = currentVersion.split('.');
         const choices = [
@@ -302,10 +302,12 @@ async function publish() {
             cli.done('Successfully published!');
         } else { // 普通 publish
             await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+
             if (pkg.scripts.prepublishOnly)
                 await cli.exec('npm run prepublishOnly');
 
             const usagePath = path.resolve(cwd, 'usage.json');
+            const zipPath = path.resolve(cwd, pkg.name + '.zip');
             if (!fs.existsSync(usagePath)) {
                 console.error('[ERROR] Not contain usage.json');
                 console.error('Please check prepublishOnly cmd');
@@ -313,40 +315,21 @@ async function publish() {
             }
             const authorization = await utils.getAuthorization();
             const pfAxios = await utils.getPlatformAxios();
-            const usage = JSON.parse(await fs.readFile(usagePath, 'utf8'));
-            const versionList = usage.version.split('.')[0];
-            const result = await pfAxios.post('/api/v1/asset-center/library/upload', querystring.stringify({
-                symbol: usage.name,
-                name: usage.title,
-                description: usage.description,
-                majorVersion: versionList[0],
-                minorVersion: versionList[1] + '.' + versionList[2],
-                version: usage.version,
-                jsonSchema: JSON.stringify(usage, null, 2),
-                origin: 'lcap',
-            }), {
+            const formData = new FormData();
+            formData.append('zipFile', fs.createReadStream(zipPath));
+            formData.append('tags', '');
+            formData.append('description', '');
+            const result = await pfAxios.post('/api/v1/asset-center/library/upload', formData, {
                 headers: {
+                    ...formData.getHeaders(),
                     Cookie: `authorization=${authorization}`,
                 },
             });
-            let answers = null;
-            if (!result.data.success) {
-                answers = await inquirer.prompt([{
-                    name: 'continue',
-                    type: 'confirm',
-                    default: false,
-                    message: `${result.data.msg},继续发布将替换当前版本资源,是否继续`,
-                }]);
-            }
-            if (!answers || answers && answers.continue) {
-                if (pkg.scripts.deploy)
-                    await cli.exec('npm run deploy');
+            if (result.data.success) {
+                cli.done('Successfully published!');
             } else {
-                // throw new Error('相同版本停止发布');
+                throw new Error(result.data.msg);
             }
-            // Only handle nos
-            // !program.skipNpm && await cli.exec(npmCmds.join(' ')); // prepublishOnly
-            cli.done('Successfully published!');
         }
     } catch (e) {
         cli.error('Failed to publish!');
