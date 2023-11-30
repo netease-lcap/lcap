@@ -42,14 +42,15 @@ async function publish() {
     console.info(`  Package ${chalk.yellow(name)}`);
     console.info('  Current version: ' + chalk.cyan(currentVersion));
 
-    pkg.version = version;
+    // pkg.version = version || pkg.version;
 
     try {
         if (pkg.scripts.build && pkg.scripts.usage)
             await cli.exec('npm run build && npm run usage');
 
         const usagePath = path.resolve(cwd, 'usage.json');
-        const zipPath = path.resolve(cwd, pkg.name + '.zip');
+        const zipPath = path.resolve(cwd, pkg.name + '@' + pkg.version + '.zip');
+
         if (!fs.existsSync(usagePath)) {
             console.error('[ERROR] Not contain usage.json');
             console.error('Please check prepublishOnly cmd');
