@@ -40,8 +40,11 @@ if (!fs.existsSync(pkgPath)) {
     process.exit(1);
 }
 const pkg = require(pkgPath);
-const usage = require(path.resolve(cwd, 'usage.json'));
-const prefixPath = usage?.compilerInfoMap?.js?.prefix;
+let prefixPath = '';
+if (pkg.vusion) {
+    const usage = require(path.resolve(cwd, 'usage.json'));
+    prefixPath = usage?.compilerInfoMap?.js?.prefix;
+}
 let version = program.packageVersion || pkg.version;
 if (!semver.valid(version)) {
     console.error(`Invalid version ${version}`);
@@ -75,6 +78,5 @@ formFiles = formFiles.map((filePath) => {
     relativePath = path.posix.join(prefix, relativePath);
     return { name: relativePath, path: filePath };
 });
-// console.log(formFiles, 22);
 
 upload(formFiles, { platform, bucket, username, password });
