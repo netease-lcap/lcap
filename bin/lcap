@@ -32,6 +32,7 @@ program
     .command('deploy', 'Push files to NOS static bucket')
     .command('readme', 'Generate final readable README.md from api.yaml and docs')
     .command('usage', 'Generate usage.json')
+    .command('build', 'build lcap extension files')
     .command('vetur', 'Generate tags.json and attributes.json for Vetur')
     .command('create', 'Generate Component and Logic');
 

@@ -1,0 +1,44 @@
+#!/usr/bin/env node
+
+const path = require('path');
+const fs = require('fs-extra');
+const utils = require('../lib/utils');
+const root = process.cwd();
+
+const program = require('commander');
+const callZip = require('../lib/zip');
+const vusion = require('vusion-api');
+const genUsageByTs = require('../lib/genLcapConfigByTs');
+const cli = vusion.cli;
+
+program
+    .usage('<dest>')
+    .description(`build lcap extension files`)
+    .option('--platform <platform>', `Usage platform`)
+    .parse(process.argv);
+
+let staticUrl = program.platform;
+
+(async () => {
+    try {
+      cli.info('开始编译 api.ts');
+      await cli.exec('npx tsc -p tsconfig.api.json');
+      cli.done('编译声明文件完成');
+    } catch (e) {
+      cli.error('编译声明文件失败, ' + e.message);
+      process.exit(1);
+    }
+
+    if (!staticUrl) {
+        staticUrl = await utils.getPlatformStatic();
+    }
+    const extensionConfig = genUsageByTs(root, staticUrl);
+
+    if (extensionConfig) {
+        fs.writeFileSync(path.join(root, 'nasl.extension.json'), JSON.stringify(extensionConfig, null, 2));
+        callZip(true);
+    } else {
+        cli.error('该依赖库没有内容，请检查');
+    }
+})();
+
