@@ -1,0 +1,34 @@
+/// <reference types="@nasl/types" />
+import { ExtensionComponent } from '@/typings.d.ts';
+
+namespace extensions.{{pkgName}}.viewComponents {
+  const { Component, Prop, ViewComponent, Slot, Method, Event, ViewComponentOptions } = nasl.ui;
+
+  @ExtensionComponent({
+    type: '{{type}}',
+    ideusage: {
+      idetype: 'element',
+    }
+  })
+  @Component({
+    title: '{{title}}',
+    icon: 'radio',
+    description: '{{description}}',
+    group: '{{group}}',
+  })
+  export class {{compName}}<
+    T,
+    V,
+    P extends boolean,
+    M extends boolean,
+    C extends string
+  > extends ViewComponent {
+    constructor(options?: Partial<{{compName}}Options<T, V, P, M, C>>) {
+      super();
+    }
+  }
+
+  export class {{compName}}Options<T, V, P extends boolean, M extends boolean, C extends string> extends ViewComponentOptions {
+    
+  }
+}
