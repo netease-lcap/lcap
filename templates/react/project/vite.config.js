@@ -1,18 +1,17 @@
-const { defineConfig, mergeConfig, loadConfigFromFile } = require('vite');
-const autoprefixer = require('autoprefixer');
+const { defineConfig } = require('vite');
 const react = require('@vitejs/plugin-react');
 const path = require('path');
 
 module.exports = defineConfig(async (configEnv) => {
   const pkgInfo = require(`${process.cwd()}/package.json`);
-  const loadingResult = await loadConfigFromFile(configEnv, '', process.cwd());
   const defaultConfig = {
     plugins: [react()],
     build: {
-      target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
+      target: ['es2020', 'edge88', 'firefox78', 'chrome56', 'safari14'],
       lib: {
         entry: 'src/index.ts',
         name: pkgInfo.name,
+        formats: ['es', 'cjs', 'umd'],
         fileName: (format, entryName) => {
           switch (format) {
             case 'es':
@@ -26,7 +25,7 @@ module.exports = defineConfig(async (configEnv) => {
       },
       outDir: 'dist-theme',
       sourcemap: false,
-      cssMinify: true,
+      minify: false,
       rollupOptions: {
         external: ['react', 'react-dom'],
         output: {
@@ -50,21 +49,6 @@ module.exports = defineConfig(async (configEnv) => {
         VUE_APP_DESIGNER: false,
       },
     },
-    css: {
-      postcss: {
-        plugins: [
-          autoprefixer({
-            overrideBrowserslist: [
-              '> 1%',
-              'last 2 versions',
-              'ie >= 9',
-            ],
-            grid: true,
-          }),
-        ],
-      },
-    },
-    esbuild: false,
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '../src'),
@@ -76,9 +60,5 @@ module.exports = defineConfig(async (configEnv) => {
     },
   };
 
-  if (!loadingResult) {
-    return defaultConfig;
-  }
-
-  return mergeConfig(defaultConfig);
+  return defaultConfig;
 });

@@ -1,5 +1,3 @@
-const { mergeConfig } = require('vite');
-const defineViteConfig = require('../vite.config');
 const pwd = process.cwd();
 const config = {
   stories: [
@@ -14,13 +12,15 @@ const config = {
   ],
   framework: {
     name: "@storybook/react-vite",
+    options: {
+      builder: {
+        viteConfigPath: './vite.config.js',
+      },
+    },
   },
   docs: {
     autodocs: "tag",
-  },
-  async viteFinal(config, { configType }) {
-    const viteConfig = await defineViteConfig({ command: 'build', mode: configType })
-    return mergeConfig(config);
   }
 };
+
 module.exports = config;

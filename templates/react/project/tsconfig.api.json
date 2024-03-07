@@ -23,5 +23,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["./src/components/*/api.ts", "./src/logics/*/api.ts"]
+  "include": ["./src/components/*/api.ts", "./src/logics/*/api.ts", "./src/typings.d.ts"]
 }

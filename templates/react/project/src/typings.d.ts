@@ -7,4 +7,14 @@ declare module '*.module.less' {
   export default classes;
 }
 
-export function ExtensionComponent(options?: ExtensionComponentOptions): (target: any) => void;
+declare namespace extensions.react_library_demo {
+  export interface ExtensionComponentOptions {
+    type: 'pc' | 'h5',
+    ideusage: {
+      idetype?: 'element' | 'modal' | 'popover' | 'container' | string;
+      [key: string]: any;
+    }
+  }
+
+  export function ExtensionComponent(options?: ExtensionComponentOptions): (target: any) => void;
+}

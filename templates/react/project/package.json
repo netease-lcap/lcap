@@ -1,8 +1,8 @@
 {
-  "name": "react_library_demo",
+  "name": "react_library_example",
   "private": true,
   "version": "1.0.0",
-  "title": "React依赖库Demo",
+  "title": "React demo依赖库",
   "description": "react fontlibrary demo",
   "main": "dist-theme/index.js",
   "files": [
@@ -17,8 +17,9 @@
   },
   "scripts": {
     "dev": "npm run start",
-    "start": "node ./scripts/start.js",
-    "build": "node ./scripts/build.js && lcap build",
+    "start": "storybook dev -p 8008",
+    "build": "vite build && lcap build",
+    "usage": "lcap build",
     "test": "vitest",
     "release": "lcap publish"
   },
