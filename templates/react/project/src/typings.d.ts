@@ -7,7 +7,7 @@ declare module '*.module.less' {
   export default classes;
 }
 
-declare namespace extensions.react_library_demo {
+declare namespace extensions {
   export interface ExtensionComponentOptions {
     type: 'pc' | 'h5',
     ideusage: {

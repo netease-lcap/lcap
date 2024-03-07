@@ -5,7 +5,7 @@ const path = require('path');
 module.exports = defineConfig(async (configEnv) => {
   const pkgInfo = require(`${process.cwd()}/package.json`);
   const defaultConfig = {
-    plugins: [react()],
+    plugins: [react({ jsxRuntime: 'classic' })],
     build: {
       target: ['es2020', 'edge88', 'firefox78', 'chrome56', 'safari14'],
       lib: {
