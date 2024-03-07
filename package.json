@@ -78,10 +78,5 @@
     "npm-run-all": "^4.1.1",
     "nyc": "^11.2.1",
     "vusion-hooks": "^0.3.0"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "node node_modules/vusion-hooks/pre-commit"
-    }
   }
 }

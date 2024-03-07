@@ -17,7 +17,7 @@
     "baseUrl": ".",
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outFile": "./dist-theme/nasl.extension.ts",
+    "outFile": "./nasl.extension.ts",
     "lib": ["esnext", "dom"],
     "paths": {
       "@/*": ["*"]
