@@ -8,7 +8,7 @@ const fs = require('fs-extra');
 const cwd = process.cwd();
 const pkg = require(path.resolve(cwd, 'package.json'));
 
-if (pkg.peerDependencies && pkg.react) {
+if (pkg.peerDependencies && pkg.peerDependencies.react) {
     Plop.launch({
         cwd: argv.cwd,
         configPath: path.join(__dirname, '../templates/react/index.js'),
