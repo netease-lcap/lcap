@@ -20,7 +20,7 @@
     "outFile": "./nasl.extension.ts",
     "lib": ["esnext", "dom"],
     "paths": {
-      "@/*": ["*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["./src/components/*/api.ts", "./src/logics/*/api.ts"]
