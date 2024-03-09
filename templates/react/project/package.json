@@ -2,6 +2,7 @@
   "name": "react_library_example",
   "private": true,
   "version": "1.0.0",
+  "lcapIdeVersion": "3.8",
   "title": "React demo依赖库",
   "description": "react fontlibrary demo",
   "main": "dist-theme/index.js",

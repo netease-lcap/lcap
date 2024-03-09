@@ -64,15 +64,15 @@ module.exports = {
               group: '',
             },
         })), {
-            path: path.resolve(process.cwd(), './src/index.ts'),
+            path: path.resolve(process.cwd(), './src/components/index.ts'),
             pattern: /(\/\/ COMPONENT IMPORTS)/g,
-            template: 'import {{name}} from \'./components/{{name}}\';\n$1',
+            template: 'import {{name}} from \'./{{name}}\';\n$1',
             type: 'modify',
         },
         {
-            path: path.resolve(process.cwd(), './src/index.ts'),
+            path: path.resolve(process.cwd(), './src/components/index.ts'),
             pattern: /(\/\/ COMPONENT EXPORTS)/g,
-            template: '\t{{name}},\n$1',
+            template: '  {{name}},\n$1',
             type: 'modify',
         },
         ];
