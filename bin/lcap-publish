@@ -38,6 +38,21 @@ const name = pkg.name;
 const currentVersion = pkg.version;
 const version = program.args[0] && semver.clean(program.args[0]);
 
+async function checkConfig(cwd) {
+    const checkFiles = ['nasl.extension.json', 'usage.json'];
+    const results = await Promise.all(checkFiles.map((fileName) => {
+        const filePath = path.resolve(cwd, fileName);
+        return fs.pathExists(filePath);
+    }));
+
+    const index = results.find((r) => r);
+
+    if (index === -1) {
+        console.error('[ERROR] Not contain nasl.extension.json or usage.json');
+        process.exit(1);
+    }
+}
+
 async function publish() {
     console.info(`  Package ${chalk.yellow(name)}`);
     console.info('  Current version: ' + chalk.cyan(currentVersion));
@@ -45,17 +60,17 @@ async function publish() {
     // pkg.version = version || pkg.version;
 
     try {
-        if (pkg.scripts.build && pkg.scripts.usage)
-            await cli.exec('npm run build && npm run usage');
+        if (pkg.scripts.build && pkg.scripts.usage) {
+            if (pkg.scripts.build.indexOf('lcap build') !== -1) {
+                await cli.exec('npm run build');
+            } else {
+                await cli.exec('npm run build && npm run usage');
+            }
+        }
 
-        const usagePath = path.resolve(cwd, 'usage.json');
+        await checkConfig(cwd);
         const zipPath = path.resolve(cwd, pkg.name + '@' + pkg.version + '.zip');
 
-        if (!fs.existsSync(usagePath)) {
-            console.error('[ERROR] Not contain usage.json');
-            console.error('Please check prepublishOnly cmd');
-            process.exit(1);
-        }
         const authorization = await utils.getAuthorization();
         const pfAxios = await utils.getPlatformAxios();
         const formData = new FormData();
