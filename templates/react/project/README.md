@@ -38,6 +38,12 @@ npm run build
 
 构建完成后，将 `[packageName]@[packageVersion].zip` 文件上传到平台即可
 
+
+## 上传发布 
+```
+npm run release
+```
+
 ## 修改构建配置
 
 在根目录下创建 `vite.config.js` 文件即可，[配置文档](https://cn.vitejs.dev/config/)

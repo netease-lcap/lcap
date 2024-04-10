@@ -19,8 +19,7 @@
   "scripts": {
     "dev": "npm run start",
     "start": "storybook dev -p 8008",
-    "build": "vite build && lcap build",
-    "usage": "lcap build",
+    "build": "vite build",
     "test": "vitest",
     "release": "lcap publish"
   },

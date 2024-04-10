@@ -61,11 +61,9 @@ async function publish() {
 
     try {
         if (pkg.scripts.build && pkg.scripts.usage) {
-            if (pkg.scripts.build.indexOf('lcap build') !== -1) {
-                await cli.exec('npm run build');
-            } else {
-                await cli.exec('npm run build && npm run usage');
-            }
+            await cli.exec('npm run build && npm run usage');
+        } else if (pkg.scripts.build) {
+            await cli.exec('npm run build');
         }
 
         await checkConfig(cwd);
