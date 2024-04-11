@@ -52,6 +52,7 @@ module.exports = {
             template: [
               '/**',
               ' * @NaslLogic',
+              ' * @type {{type}}',
               ' * @title {{title}}',
               ' * @desc {{title}}',
               ' * @param str 参数描述',

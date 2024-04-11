@@ -61,7 +61,6 @@ module.exports = {
             data: {
               compName,
               tagName,
-              type: 'pc',
               title: data.title,
               description: data.title,
               pkgName: pkg.name,
