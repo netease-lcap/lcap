@@ -8,10 +8,40 @@ const fs = require('fs-extra');
 const cwd = process.cwd();
 const pkg = require(path.resolve(cwd, 'package.json'));
 
-if (pkg.peerDependencies && pkg.peerDependencies.react) {
+const getFrameWorkKind = (pkgInfo) => {
+    if (pkgInfo.peerDependencies && Object.keys(pkgInfo.peerDependencies).includes('@tarojs/taro')) {
+      return 'taro';
+    }
+
+    if (pkgInfo.peerDependencies && Object.keys(pkgInfo.peerDependencies).includes('react')) {
+      return 'react';
+    }
+
+    if (
+      pkgInfo.peerDependencies
+      && pkgInfo.peerDependencies.vue
+      && (pkgInfo.peerDependencies.vue.startsWith('3.') || pkgInfo.peerDependencies.vue.startsWith('^3.'))
+    ) {
+      return 'vue3';
+    }
+
+    if (
+      pkgInfo.peerDependencies
+      && pkgInfo.peerDependencies.vue
+      && (pkgInfo.peerDependencies.vue.startsWith('2.') || pkgInfo.peerDependencies.vue.startsWith('^2.'))
+    ) {
+      return 'vue2';
+    }
+
+    return '';
+};
+
+const framework = getFrameWorkKind(pkg);
+
+if (fs.existsSync(path.resolve(cwd, 'vusion.config.js'))) {
     Plop.launch({
         cwd: argv.cwd,
-        configPath: path.join(__dirname, '../templates/react/index.js'),
+        configPath: path.join(__dirname, '../plopfile.js'),
         require: argv.require,
         completion: argv.completion,
     }, (env) => {
@@ -21,12 +51,12 @@ if (pkg.peerDependencies && pkg.peerDependencies.react) {
         };
         run(options, { }, true);
     });
-} else if (!fs.existsSync(path.resolve(cwd, 'vusion.config.js'))) {
+} else if (!pkg.lcapIdeVersion || !framework) {
     console.error(`该项目不支持`);
 } else {
     Plop.launch({
         cwd: argv.cwd,
-        configPath: path.join(__dirname, '../plopfile.js'),
+        configPath: path.join(__dirname, `../templates/${framework}/index.js`),
         require: argv.require,
         completion: argv.completion,
     }, (env) => {

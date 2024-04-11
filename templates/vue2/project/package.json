@@ -1,10 +1,10 @@
 {
-  "name": "react_library_example",
-  "private": true,
-  "version": "1.0.0",
+  "name": "vue_library_example",
+  "private": "true",
+  "version": "1.0.2",
   "lcapIdeVersion": "3.8",
-  "title": "React demo依赖库",
-  "description": "react fontlibrary demo",
+  "title": "Vue 依赖库demo",
+  "description": "Vue 依赖库demo",
   "main": "dist-theme/index.js",
   "files": [
     "dist-theme"
@@ -16,6 +16,7 @@
       "require": "./dist-theme/index.cjs"
     }
   },
+
   "scripts": {
     "dev": "npm run start",
     "start": "storybook dev -p 8008",
@@ -24,40 +25,45 @@
     "release": "lcap publish"
   },
   "keywords": [
-    "React"
+    "Vue",
+    "Vue2"
   ],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+  },
   "devDependencies": {
     "@lcap/builder": "^1.1.0-beta.5",
+    "@lcap/storybook-vue-vite": "^7.6.17",
+    "@lcap/vite-plugin-vue2": "^1.0.0",
     "@nasl/types": "^0.1.6",
     "@storybook/addon-essentials": "^7.6.17",
     "@storybook/addon-interactions": "^7.6.17",
     "@storybook/addon-links": "^7.6.17",
-    "@storybook/addon-onboarding": "^1.0.11",
+    "@storybook/addon-onboarding": "^1.0.10",
     "@storybook/blocks": "^7.6.17",
-    "@storybook/react": "^7.6.17",
-    "@storybook/react-vite": "^7.6.17",
+    "@storybook/builder-vite": "^7.6.17",
     "@storybook/test": "^7.6.17",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "@vitejs/plugin-react": "^4.2.1",
-    "autoprefixer": "^10.4.18",
+    "@storybook/vue": "^7.6.17",
+    "@types/fs-extra": "^11.0.4",
+    "@types/lodash": "^4.14.202",
+    "@vue/test-utils": "^1.3.5",
+    "autoprefixer": "^10.4.16",
+    "jest-serializer-vue-tjw": "^3.20.0",
     "jsdom": "^23.0.1",
-    "less": "^4.2.0",
-    "prop-types": "^15.8.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "marked": "^12.0.1",
+    "rimraf": "^5.0.5",
     "storybook": "^7.6.17",
     "typescript": "^5.3.3",
     "vite": "^5.0.10",
-    "vitest": "^1.1.0"
-  },
-  "dependencies": {
-    "react-error-boundary": "^4.0.13"
+    "vitest": "^1.1.0",
+    "vitest-canvas-mock": "^0.3.3",
+    "vue": "2.6.12",
+    "vue-i18n": "^8.15.5",
+    "vue-router": "3.3.4",
+    "vue-template-compiler": "2.6.12"
   },
   "peerDependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "vue": "^2.6.0"
   }
 }
