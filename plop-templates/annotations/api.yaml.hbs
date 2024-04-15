@@ -1,0 +1,22 @@
+- name: {{name}}
+  description: {{description}}
+  type: {{type}}
+  belong: annotation
+  labels: [Runtime]
+  applyTo: ViewElement
+  properties:
+    - name: useAnno
+      title: 需要传入的值
+      defaultValue:
+        concept: DefaultValue
+        expression:
+          concept: BooleanLiteral
+          value: false
+      typeAnnotation:
+        concept: TypeAnnotation
+        typeKind: primitive
+        typeName: Boolean
+        typeNamespace: nasl.core
+      setter:
+        concept: SwitchSetter
+
