@@ -45,7 +45,7 @@ export default defineConfig(({ command }) => {
         entry: 'src/index',
         name: kb2Camcel(pkgInfo.name),
       },
-      sourcemap: false,
+      sourcemap: true,
     },
     test: {
       environment: 'jsdom',

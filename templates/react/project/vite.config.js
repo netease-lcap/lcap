@@ -19,8 +19,7 @@ module.exports = defineConfig((configEnv) => {
         formats: ['es', 'cjs', 'umd'],
       },
       outDir: 'dist-theme',
-      sourcemap: false,
-      minify: false,
+      sourcemap: true,
       rollupOptions: {
         external: ['react', 'react-dom'],
         output: {
