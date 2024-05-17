@@ -9,6 +9,8 @@ const vusion = require('vusion-api');
 const configurator = require('../lib/config');
 const utils = require('../lib/utils');
 const cli = vusion.cli;
+const querystring = require('querystring');
+const FormData = require('form-data');
 
 const cwd = process.cwd();
 const pkgPath = path.resolve(cwd, 'package.json');
@@ -17,7 +19,7 @@ if (!fs.existsSync(pkgPath)) {
     console.error('Please locate into a npm package directory.');
     process.exit(1);
 }
-let pkg = require(pkgPath);
+const pkg = require(pkgPath);
 
 /**
  * Parse Commands
@@ -34,281 +36,57 @@ program
 
 const name = pkg.name;
 const currentVersion = pkg.version;
-let version = program.args[0] && semver.clean(program.args[0]);
-// const config = configurator.load();
+const version = program.args[0] && semver.clean(program.args[0]);
 
-// const manager = program.manager || config.publish_manager;
-// const registry = program.registry || config.registries[config.publish_manager];
+async function checkConfig(cwd) {
+    const checkFiles = ['nasl.extension.json', 'usage.json'];
+    const results = await Promise.all(checkFiles.map((fileName) => {
+        const filePath = path.resolve(cwd, fileName);
+        return fs.pathExists(filePath);
+    }));
+
+    const index = results.find((r) => r);
+
+    if (index === -1) {
+        console.error('[ERROR] Not contain nasl.extension.json or usage.json');
+        process.exit(1);
+    }
+}
 
 async function publish() {
     console.info(`  Package ${chalk.yellow(name)}`);
     console.info('  Current version: ' + chalk.cyan(currentVersion));
 
-    if (!version) {
-        const arr = currentVersion.split('.');
-        const choices = [
-            { name: 'patch', value: [arr[0], arr[1], +arr[2] + 1].join('.') },
-            { name: 'minor', value: [arr[0], +arr[1] + 1, 0].join('.') },
-            { name: 'major', value: [+arr[0] + 1, 0, 0].join('.') },
-        ];
-        choices.forEach((choice) => choice.name += ' - ' + choice.value);
-
-        const { newVersion } = await inquirer.prompt([{
-            type: 'list',
-            name: 'newVersion',
-            message: `Which version do you want to publish?`,
-            choices,
-        }]);
-
-        version = newVersion;
-    }
-
-    const message = `      New version: ${chalk.cyan(version)}`;
-    console.info(message);
-    console.info('-'.repeat(32));
-
-    const { yes } = await inquirer.prompt([{
-        name: 'yes',
-        type: 'confirm',
-        message: 'Make sure to continue',
-    }]);
-
-    if (!yes)
-        return;
-
-    pkg.version = version;
-
-    // const npmCmds = [`${/^win/.test(process.platform) ? manager + '.cmd' : manager} publish`];
-    // if (program.tag)
-    //     npmCmds.push(`--tag ${program.tag}`);
-
-    // if (program.access)
-    //     npmCmds.push(`--access ${program.access}`);
-    // else if (pkg.name.includes('/'))
-    //     npmCmds.push(`--access public`);
-
-    // if (program.registry)
-    //     npmCmds.push(`--registry ${registry}`);
+    // pkg.version = version || pkg.version;
 
     try {
-        if (pkg.vusion && (pkg.vusion.type === 'component' || pkg.vusion.type === 'block' || pkg.vusion.type === 'template')) {
-            if (pkg.vusion.type !== 'template') {
-                // 兼容老版，以后私有库可能有用
-                const staticUrl = await utils.getPlatformStatic();
-                pkg.homepage = `${staticUrl}/${pkg.name}@${pkg.version}/index.html`;
-            }
+        if (pkg.scripts.build && pkg.scripts.usage) {
+            await cli.exec('npm run build && npm run usage');
+        } else if (pkg.scripts.build) {
+            await cli.exec('npm run build');
+        }
 
-            await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+        await checkConfig(cwd);
+        const zipPath = path.resolve(cwd, pkg.name + '@' + pkg.version + '.zip');
 
-            // run prepublishOnly after version updated
-            if (pkg.scripts.prepublishOnly)
-                await cli.exec('npm run prepublishOnly');
-
-            const usagePath = path.resolve(cwd, 'usage.json');
-            if (!fs.existsSync(usagePath)) {
-                console.error('[ERROR] Not contain usage.json');
-                console.error('Please check prepublishOnly cmd');
-                process.exit(1);
-            }
-            const usage = JSON.parse(await fs.readFile(usagePath, 'utf8'));
-
-            // Only handle nos
-            // !program.skipNpm && await cli.exec(npmCmds.join(' ')); // prepublishOnly
-
-            pkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
-
-            const { symbol, version, jsonSchema, depDescription, labels, screenShot } = usage;
-            // format majorVersion / minorVersion
-            const [majorVersion, ...minorVersion] = version.split('.');
-            // format screenShot
-            const fnScreenShot = Array.isArray(screenShot) ? screenShot.join(',') : screenShot;
-            // format JsonSchema
-            const fnJsonSchema = typeof jsonSchema === 'string' ? JSON.parse(jsonSchema) : (jsonSchema || {
-                attrs: [],
-                slots: [],
-                blocks: [],
-                events: [],
-                children: [],
-            });
-            if (!fnJsonSchema.attrs) {
-                fnJsonSchema.attrs = [];
-            }
-            if (!fnJsonSchema.slots) {
-                fnJsonSchema.slots = [];
-            }
-            if (!fnJsonSchema.blocks) {
-                fnJsonSchema.blocks = JSON.stringify([]);
-            } else if (typeof fnJsonSchema.blocks !== 'string') {
-                fnJsonSchema.blocks = JSON.stringify(fnJsonSchema.blocks);
-            }
-            if (!fnJsonSchema.screenShot) {
-                fnJsonSchema.screenShot = fnScreenShot;
-            } else if (Array.isArray(fnJsonSchema.screenShot)) {
-                fnJsonSchema.screenShot = fnJsonSchema.screenShot.join(',');
-            }
-            if (!fnJsonSchema.name) {
-                fnJsonSchema.name = symbol;
-            }
-            if (!fnJsonSchema.title) {
-                fnJsonSchema.title = usage.name;
-            }
-            if (!fnJsonSchema.description) {
-                fnJsonSchema.description = usage.description;
-            }
-            if (!fnJsonSchema.events) {
-                fnJsonSchema.events = [];
-            }
-            if (!fnJsonSchema.children) {
-                fnJsonSchema.children = [];
-            }
-            // format depDescription
-            let fnDepDescription;
-            if (!depDescription) {
-                fnDepDescription = JSON.stringify([]);
-            } else if (!Array.isArray(depDescription)) {
-                fnDepDescription = JSON.stringify(Object.values(depDescription));
-            } else if (typeof depDescription !== 'string') {
-                fnDepDescription = JSON.stringify(depDescription);
-            }
-            // format labels
-            let fnLabels = labels;
-            if (!Array.isArray(labels)) {
-                fnLabels = [labels].filter((i) => i);
-            }
-            // format platformVersion
-            const platformVersion = '1';
-            const model = {
-                symbol,
-                name: usage.name,
-                description: usage.description,
-                icon: usage.icon,
-                jsonSchema: JSON.stringify(fnJsonSchema),
-                manual: usage.manual || '',
-                document: usage.homepage || '',
-                updateLog: usage.updateLog || '',
-                repoAddr: usage.repoAddr || '',
-                industry: usage.industry || '',
-                scenes: usage.scenes || fnJsonSchema.category,
-                screenShot: fnScreenShot,
-                labels: fnLabels,
-                scope: usage.scope || 'pc',
-                depDescription: fnDepDescription,
-                majorVersion,
-                minorVersion: minorVersion.join('.'),
-                downloadMethod: usage.downloadMethod || 'npm',
-                type: 'extendComponent',
-                subType: '',
-                platformVersion,
-            };
-
-            const pfAxios = await utils.getPlatformAxios();
-            const authorization = await utils.getAuthorization();
-            const apiVersion = configurator.get('api_version') || 'v2';
-            if (apiVersion === 'v1') {
-                const { data = {} } = await pfAxios.get('/api/v1/assetdsl/unpub/list', {
-                    params: {
-                        platformVersion,
-                        symbol,
-                    },
-                    headers: {
-                        Cookie: `authorization=${authorization}`,
-                    },
-                }) || {};
-                const { result } = data;
-                if (result.count) {
-                    await pfAxios.post('/api/v1/assetdsl/update', {
-                        symbol: model.symbol,
-                        name: model.name,
-                        description: model.description,
-                        type: model.type,
-                        subType: model.subType,
-                        platformVersion: model.platformVersion,
-                        jsonSchema: model.jsonSchema,
-                        depDescription: model.depDescription,
-                        dsl: model.dsl,
-                    }, {
-                        headers: {
-                            Cookie: `authorization=${authorization}`,
-                        },
-                    });
-                } else {
-                    await pfAxios.post('/api/v1/assetdsl/add', {
-                        symbol: model.symbol,
-                        editName: model.name,
-                        editDesc: model.description,
-                        editType: model.type,
-                        editSubType: model.subType,
-                        platformVersion: model.platformVersion,
-                        jsonSchema: model.jsonSchema,
-                        depDescription: model.depDescription,
-                        dsl: model.dsl,
-                    }, {
-                        headers: {
-                            Cookie: `authorization=${authorization}`,
-                        },
-                    });
-                }
-                await pfAxios.post('/api/v1/assetdsl/publish', {
-                    symbol: model.symbol,
-                    name: model.name,
-                    description: model.description,
-                    icon: model.icon,
-                    type: model.type,
-                    industry: model.industry,
-                    scenes: model.scenes,
-                    scope: model.scope,
-                    publishPlatformVersion: model.platformVersion,
-                    publishMajorVersion: model.majorVersion,
-                    publishMinorVersion: model.minorVersion,
-                    screenShot: model.screenShot,
-                    downloadMethod: model.downloadMethod,
-                    labels: model.labels,
-                    manual: model.manual,
-                    document: model.document,
-                    updateLog: model.updateLog,
-                    repoAddr: model.repoAddr,
-                }, {
-                    headers: {
-                        Cookie: `authorization=${authorization}`,
-                    }
-                });
-            } else {
-                await pfAxios.post('/api/v1/asset-center/component/publish', {
-                    symbol: model.symbol,
-                    name: model.name,
-                    description: model.description,
-                    icon: model.icon,
-                    type: 'extend',
-                    industry: model.industry,
-                    scenes: model.scenes,
-                    jsonSchema: model.jsonSchema,
-                    version: `${model.majorVersion}.${model.minorVersion}`,
-                    picture: model.screenShot,
-                    manual: model.manual,
-                }, {
-                    headers: {
-                        Cookie: `authorization=${authorization}`,
-                    },
-                });
-            }
-            cli.done('Successfully registered package on lcap platform.');
-            console.info();
-
-            if (pkg.scripts.deploy)
-                await cli.exec('npm run deploy');
-
-            console.info();
+        const authorization = await utils.getAuthorization();
+        const pfAxios = await utils.getPlatformAxios();
+        const formData = new FormData();
+        formData.append('zipFile', fs.createReadStream(zipPath));
+        formData.append('tags', '');
+        formData.append('description', '');
+        const result = await pfAxios.post('/api/v1/asset-center/library/upload', formData, {
+            headers: {
+                ...formData.getHeaders(),
+                Cookie: `authorization=${authorization}`,
+            },
+        });
+        if (result.data.success) {
             cli.done('Successfully published!');
-        } else { // 普通 publish
-            await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
-            // Only handle nos
-            // !program.skipNpm && await cli.exec(npmCmds.join(' ')); // prepublishOnly
-
-            console.info();
-            cli.done('Successfully published!');
+        } else {
+            throw new Error(result.data.msg);
         }
     } catch (e) {
-        console.info();
         cli.error('Failed to publish!');
         e && console.error(e.response ? e.response.data : e);
         process.exit(1);

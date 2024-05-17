@@ -1,0 +1,9 @@
+{
+    "name": "lcap",
+    "description": "CLI for Lcap Projects, including Application and UI Library.",
+    "specVersion": "1.0.0",
+    "type": "module",
+    "subType": "extension",
+    "version": "0.1.23",
+    "frontends": []
+}

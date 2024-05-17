@@ -4,37 +4,30 @@ const inquirer = require('inquirer');
 const chalk = require('chalk');
 const init = require('../lib/init');
 const utils = require('../lib/utils');
+const snakeCase = require('lodash').snakeCase;
 
-function getMessage(type) {
+function getMessage() {
     return `Please input a package name.
-    It will also be used as the ${type} name and file name.
-    For examples: ${chalk.cyan('custom-button')}
+    It will also be used as file name.
+    For examples: ${chalk.cyan('library_example')}
     `;
 }
 
 const { argv } = process;
 (async function () {
+    const type = 'component';
     if (argv.length <= 2) {
-        const { type } = await inquirer.prompt([{
-            type: 'list',
-            name: 'type',
-            message: 'Select a material type',
-            choices: [
-                {
-                    name: 'component' + chalk.gray(' - Initialize a vusion custom component'),
-                    value: 'component',
-                },
-            ],
-        }]);
-
         const { name } = await inquirer.prompt([
             {
                 type: 'input',
                 name: 'name',
-                message: getMessage(type),
+                message: getMessage(),
                 default: undefined,
                 validate(name) {
                     return !!name;
+                },
+                filter(val) {
+                    return snakeCase(val);
                 },
             },
         ]);
@@ -49,36 +42,17 @@ const { argv } = process;
         }, {
             isUser: false,
         });
-    } else if (argv[2] !== 'component') {
-        console.error(`only support component, try ${chalk.cyan('lcap init component')}`);
-        process.exit(1);
-    } else {
-        let name;
-        if (argv.length >= 4 && argv[3]) {
-            name = argv[3];
-        } else {
-            const answer = await inquirer.prompt([
-                {
-                    type: 'input',
-                    name: 'name',
-                    message: getMessage('component'),
-                    validate(name) {
-                        return !!name;
-                    },
-                },
-            ]);
-            name = answer.name;
-        }
-
+    } else if (argv.length === 3) {
+        const name = snakeCase(argv[2]);
         return init({
-            type: 'component',
-            material: 'component',
+            type,
+            material: type,
             name,
             path: utils.getFileName(name),
             access: 'public',
             team: '',
         }, {
-            force: argv.length >= 5 ? !!argv[4] : false,
+            isUser: false,
         });
     }
 })();
