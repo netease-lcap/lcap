@@ -27,6 +27,6 @@
       "@components/*": ["./src/components/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "ide/**/*.ts", "ide/**/*.tsx"],
   "references": []
 }
