@@ -10,11 +10,12 @@ declare module '*.module.less' {
 
 declare namespace extensions {
   export interface ExtensionComponentOptions {
-    type: 'pc' | 'h5' | 'both',
+    type: 'pc' | 'h5' | 'both';
+    show: boolean;
     ideusage?: {
       idetype?: 'element' | 'modal' | 'popover' | 'container' | string;
       [key: string]: any;
-    }
+    };
   }
 
   export function ExtensionComponent(options?: ExtensionComponentOptions): (target: any) => void;
