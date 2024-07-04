@@ -2,14 +2,13 @@
 
 const path = require('path');
 const fs = require('fs-extra');
+const program = require('commander');
 const { getUsage, getNewUsage } = require('../lib/usage');
 const utils = require('../lib/utils');
-const root = process.cwd();
-
-const program = require('commander');
+const logger = require('../lib/logger');
 const callZip = require('../lib/zip');
-const vusion = require('vusion-api');
-const cli = vusion.cli;
+
+const root = process.cwd();
 
 program
     .usage('<dest>')
@@ -44,7 +43,7 @@ let staticUrl = program.platform;
             callZip();
         }
     } else {
-        cli.error('该依赖库没有内容，请检查');
+        logger.error('该依赖库没有内容，请检查');
     }
 })();
 
