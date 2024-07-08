@@ -40,15 +40,15 @@
     "inquirer-autocomplete-prompt": "^1.0.1",
     "inquirer-fuzzy-path": "^2.1.0",
     "js-yaml": "^3.14.0",
+    "lodash": "^4.17.21",
     "markdown-it": "^11.0.1",
     "mime-types": "^2.1.31",
+    "minimist": "^1.2.8",
     "ora": "^4.0.3",
     "plop": "2.7.6",
     "semver": "^5.5.0",
     "shelljs": "^0.8.2",
     "update-notifier": "^2.5.0",
     "yaml": "^1.7.2"
-  },
-  "devDependencies": {
   }
 }

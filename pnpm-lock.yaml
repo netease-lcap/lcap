@@ -50,12 +50,18 @@ importers:
       js-yaml:
         specifier: ^3.14.0
         version: 3.14.1
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
       markdown-it:
         specifier: ^11.0.1
         version: 11.0.1
       mime-types:
         specifier: ^2.1.31
         version: 2.1.35
+      minimist:
+        specifier: ^1.2.8
+        version: 1.2.8
       ora:
         specifier: ^4.0.3
         version: 4.1.1
