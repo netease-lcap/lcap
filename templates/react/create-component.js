@@ -60,6 +60,11 @@ if (list.length > 0) {
             { value: '', name: 'None(不重载)' },
             ...list.map((it) => ({ value: it.name, name: `${it.name}(${it.title})`})),
         ],
+    }, {
+        type: 'confirm',
+        name: 'fork',
+        message: 'Whether to fork component source code ？(是否复制基础组件源代码)\n复制组件源码后，该组件将完全独立，无法继续跟随基础组件能力升级变化，请慎重处理；',
+        default: false,
     })
 };
 
@@ -71,6 +76,7 @@ module.exports = {
             return [{
                 type: 'overloadBaseUI',
                 component: data.overloadBaseUI,
+                fork: data.fork,
             }];
         }
 
