@@ -1,0 +1,52 @@
+#!/usr/bin/env node
+const path = require("path");
+const fs = require("fs");
+const { installLcapUI, promptInstallUI } = require("../lib/install");
+const { isLcapLibrary, getFrameWorkKind } = require("../lib/project");
+const logger = require('../lib/logger');
+
+const cwd = process.cwd();
+const pkgPath = path.resolve(cwd, "package.json");
+if (!fs.existsSync(pkgPath)) {
+  logger.error("[ERROR] Not a npm package");
+  logger.error("Please locate into a npm package directory.");
+  process.exit(1);
+}
+
+(async function () {
+  const pkg = require(pkgPath);
+  if (!isLcapLibrary(pkg)) {
+    logger.error(`该项目不是 codewave 依赖库，不支持此命令`);
+    return;
+  }
+  const framework = getFrameWorkKind(pkg);
+
+  let params = {
+    framework,
+  };
+  if (pkg.lcap && pkg.lcap['lcap-ui']) {
+    params = {
+      ...params,
+      ...pkg.lcap.ui,
+    };
+  }
+
+  if (!params.platform || !params.version || !params.type) {
+    const answer = await promptInstallUI();
+    params = {
+      ...params,
+      ...answer,
+    };
+  }
+
+  try {
+    logger.info('开始安装 LCAP UI......');
+    await installLcapUI({
+      framework: framework || 'vue2',
+      ...params,
+    });
+    logger.done('安装 LCAP UI 成功');
+  } catch(e) {
+    logger.error(`安装 LCAP 模块失败，${JSON.stringify(params)}，${e.message}`);
+  }
+})();

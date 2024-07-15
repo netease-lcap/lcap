@@ -1,7 +1,7 @@
 {
   "name": "lcap",
   "description": "CLI for Lcap Projects, including Application and UI Library.",
-  "version": "0.5.0-beta.0",
+  "version": "0.6.0-beta.1",
   "author": "daysai <wddpwzz36@gmail.com>",
   "bin": {
     "lcap": "bin/lcap"
@@ -30,8 +30,10 @@
     "axios": "^0.19.0",
     "chalk": "^2.4.2",
     "commander": "^2.20.0",
+    "compressing": "^1.10.1",
     "crypto-js": "^4.1.1",
     "didyoumean": "^1.2.1",
+    "download": "^8.0.0",
     "form-data": "^4.0.0",
     "fs-extra": "^8.1.0",
     "glob": "^7.1.6",
