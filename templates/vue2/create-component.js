@@ -66,6 +66,7 @@ if (list.length > 0) {
         type: 'confirm',
         name: 'fork',
         message: 'Whether to fork component source code ？(是否复制基础组件源代码)\n复制组件源码后，该组件将完全独立，无法继续跟随基础组件能力升级变化，请慎重处理；',
+        when: (answers) => !!answers.overloadBaseUI,
         default: false,
     });
 };
