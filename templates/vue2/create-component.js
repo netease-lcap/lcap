@@ -1,8 +1,9 @@
 const path = require('path');
 const { upperFirst, camelCase, kebabCase } = require('lodash');
-const { getComponentList } = require('../../lib/project');
+const { getComponentList, getLcapUIInfo } = require('../../lib/project');
 
 const list = getComponentList();
+const lcapUIInfo = getLcapUIInfo();
 
 const prompts = [
     {
@@ -16,7 +17,6 @@ const prompts = [
                 return true;
             }
         },
-        when: (answers) => !answers.overloadBaseUI,
         filter(val) {
             return upperFirst(camelCase(val).trim());
         },
@@ -76,13 +76,10 @@ module.exports = {
     prompts,
     actions: (data) => {
         if (data.overloadBaseUI) {
-            return [{
-                type: 'overloadBaseUI',
-                component: data.overloadBaseUI,
-                fork: data.fork,
-            }];
+            const comp = list.find((it) => it.name === data.name);
+            data.title = comp ? comp.title : '';
+            data.type = lcapUIInfo ? lcapUIInfo.type : 'pc';
         }
-
         const pkg = require(path.resolve(process.cwd(), 'package.json'));
         const relationPath = path.resolve(process.cwd(), './src/components');
         const makeFileList = ['index.ts', 'index.vue', 'api.ts', 'stories/block.stories.js', 'stories/example.stories.js'];
@@ -115,6 +112,15 @@ module.exports = {
             type: 'modify',
         },
         ];
+
+        if (data.overloadBaseUI) {
+            actions.push({
+                type: 'overloadBaseUI',
+                component: data.overloadBaseUI,
+                fork: data.fork,
+                name: data.name,
+            });
+        }
 
         return actions;
     },

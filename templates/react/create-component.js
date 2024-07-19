@@ -1,8 +1,9 @@
 const path = require('path');
 const { upperFirst, camelCase } = require('lodash');
-const { getComponentList } = require('../../lib/project');
+const { getComponentList, getLcapUIInfo } = require('../../lib/project');
 
 const list = getComponentList();
+const lcapUIInfo = getLcapUIInfo();
 const prompts = [
     {
         type: 'input',
@@ -15,7 +16,6 @@ const prompts = [
                 return true;
             }
         },
-        when: (answers) => !answers.overloadBaseUI,
         filter(val) {
             return upperFirst(camelCase(val).trim());
         },
@@ -72,15 +72,12 @@ if (list.length > 0) {
 module.exports = {
     description: '创建组件',
     prompts,
-    actions: (data) => {
+    actions: (data) => {        
         if (data.overloadBaseUI) {
-            return [{
-                type: 'overloadBaseUI',
-                component: data.overloadBaseUI,
-                fork: data.fork,
-            }];
+            const comp = list.find((it) => it.name === data.name);
+            data.title = comp ? comp.title : '';
+            data.type = lcapUIInfo ? lcapUIInfo.type : 'pc';
         }
-
         const pkg = require(path.resolve(process.cwd(), 'package.json'));
         const relationPath = path.resolve(process.cwd(), './src/components');
         const makeFileList = ['index.tsx', 'index.module.less', 'api.ts', 'stories/block.stories.tsx', 'stories/example.stories.tsx'];
@@ -110,6 +107,15 @@ module.exports = {
             type: 'modify',
         },
         ];
+
+        if (data.overloadBaseUI) {
+            actions.push({
+                type: 'overloadBaseUI',
+                component: data.overloadBaseUI,
+                fork: data.fork,
+                name: data.name,
+            });
+        }
 
         return actions;
     },
