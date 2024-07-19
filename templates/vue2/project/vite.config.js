@@ -30,6 +30,8 @@ export default defineConfig(({ command }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
+        'virtual-lcap:lcap-ui': path.resolve(__dirname, './.lcap/lcap-ui/runtime/index.js'),
+        'virtual-lcap:lcap-ui.css': path.resolve(__dirname, './.lcap/lcap-ui/runtime/index.css'),
       },
     },
     define: {
@@ -37,6 +39,9 @@ export default defineConfig(({ command }) => {
         VUE_APP_DESIGNER: false,
         NODE_ENV: command === 'build' ? 'production' : 'development',
       },
+    },
+    optimizeDeps: {
+      include: ['virtual-lcap:lcap-ui'],
     },
     build: {
       cssCodeSplit: false,
