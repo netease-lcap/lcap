@@ -16,6 +16,7 @@ const prompts = [
                 return true;
             }
         },
+        when: (answers) => !answers.overloadBaseUI,
         filter(val) {
             return upperFirst(camelCase(val).trim());
         },
@@ -74,7 +75,8 @@ module.exports = {
     prompts,
     actions: (data) => {        
         if (data.overloadBaseUI) {
-            const comp = list.find((it) => it.name === data.name);
+            const comp = list.find((it) => it.name === data.overloadBaseUI);
+            data.name = upperFirst(data.prefix) + data.overloadBaseUI;
             data.title = comp ? comp.title : '';
             data.type = lcapUIInfo ? lcapUIInfo.type : 'pc';
         }
@@ -113,7 +115,7 @@ module.exports = {
                 type: 'overloadBaseUI',
                 component: data.overloadBaseUI,
                 fork: data.fork,
-                name: data.name,
+                prefix: data.prefix,
             });
         }
 
