@@ -11,7 +11,7 @@ declare module '*.module.less' {
 declare namespace extensions {
   export interface ExtensionComponentOptions {
     type: 'pc' | 'h5' | 'both';
-    show: boolean;
+    show?: boolean;
     ideusage?: {
       idetype?: 'element' | 'modal' | 'popover' | 'container' | string;
       [key: string]: any;
