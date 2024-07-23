@@ -11,6 +11,7 @@ declare namespace extensions {
   export interface ExtensionComponentOptions {
     type: 'pc' | 'h5';
     show?: boolean;
+    replaceNaslUIComponent?: string;
     ideusage: {
       idetype?: 'element' | 'modal' | 'popover' | 'container' | string;
       [key: string]: any;
