@@ -20,15 +20,6 @@ module.exports = defineConfig((configEnv) => {
       },
       outDir: 'dist-theme',
       sourcemap: true,
-      rollupOptions: {
-        external: ['react', 'react-dom'],
-        output: {
-          globals: {
-            react: 'React',
-            'react-dom': 'ReactDOM',
-          },
-        },
-      },
     },
     define: {
       'process.env': {
@@ -36,15 +27,10 @@ module.exports = defineConfig((configEnv) => {
         VUE_APP_DESIGNER: false,
       },
     },
-    optimizeDeps: {
-      include: ['virtual-lcap:lcap-ui'],
-    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
         '@components': path.resolve(__dirname, './src/components'),
-        'virtual-lcap:lcap-ui': path.resolve(__dirname, './.lcap/lcap-ui/runtime/index.js'),
-        'virtual-lcap:lcap-ui.css': path.resolve(__dirname, './.lcap/lcap-ui/runtime/index.css'),
       },
     },
     test: {
