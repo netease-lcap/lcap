@@ -24,7 +24,8 @@
     "noImplicitAny": false,
     "paths": {
       "@/*": ["./src/*"],
-      "@components/*": ["./src/components/*"]
+      "@components/*": ["./src/components/*"],
+      "@lcap-ui/*": ["./.lcap/lcap-ui/package/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "ide/**/*.ts", "ide/**/*.tsx"],

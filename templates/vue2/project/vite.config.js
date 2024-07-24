@@ -30,6 +30,7 @@ export default defineConfig(({ command }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
+        '@lcap-ui': path.resolve(__dirname, './.lcap/lcap-ui/package'),
       },
     },
     define: {

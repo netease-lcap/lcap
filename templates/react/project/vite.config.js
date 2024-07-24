@@ -31,6 +31,7 @@ module.exports = defineConfig((configEnv) => {
       alias: {
         '@': path.resolve(__dirname, './src'),
         '@components': path.resolve(__dirname, './src/components'),
+        '@lcap-ui': path.resolve(__dirname, './.lcap/lcap-ui/package'),
       },
     },
     test: {
