@@ -62,6 +62,18 @@ if (list.length > 0) {
             ...list.map((it) => ({ value: it.name, name: `${it.name}(${it.title})`})),
         ],
     }, {
+        type: 'input',
+        name: 'prefix',
+        message: 'Please Input overload prefix? (请输入重载名称前缀，例如 ex)',
+        when: (answers) => !!answers.overloadBaseUI,
+        default: 'ex',
+        filter: (val) => {
+            if (!val) {
+                return 'ex';
+            }
+            return val.trim().toLowerCase();
+        }
+    }, {
         type: 'confirm',
         name: 'fork',
         message: 'Whether to fork component source code ？(是否复制基础组件源代码)\n复制组件源码后，该组件将完全独立，无法继续跟随基础组件能力升级变化，请慎重处理；',

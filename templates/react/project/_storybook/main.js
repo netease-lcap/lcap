@@ -1,8 +1,8 @@
 const pwd = process.cwd();
 const config = {
   stories: [
-    `${pwd}/src/**/stories/**/*.mdx`,
-    `${pwd}/src/**/stories/**/*.stories.@(js|jsx|mjs|ts|tsx)`,
+    `${pwd}/src/**/*.mdx`,
+    `${pwd}/src/**/*.stories.@(js|jsx|mjs|ts|tsx)`,
   ],
   addons: [
     "@storybook/addon-links",
