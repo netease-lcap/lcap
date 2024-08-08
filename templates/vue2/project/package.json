@@ -32,7 +32,7 @@
   "dependencies": {
   },
   "devDependencies": {
-    "@lcap/builder": "^1.3.0-beta.3",
+    "@lcap/builder": "^1.3.0-beta.4",
     "@nasl/types": "^0.1.8",
     "@lcap/storybook-vue-vite": "^7.6.17",
     "@lcap/vite-plugin-vue2": "^1.0.0",
