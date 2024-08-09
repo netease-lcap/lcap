@@ -14,6 +14,11 @@ export default defineConfig(({ command }) => {
     plugins: [
       vue2({
         jsx: true,
+        jsxInclude: [
+          /.(jsx|tsx)$/,
+          '.lcap/**/*.js',
+          '.lcap/**/*.ts',
+        ],
         jsxOptions: {
           vModel: true,
           functional: false,
