@@ -78,7 +78,7 @@ if (list.length > 0) {
     }, {
         type: 'confirm',
         name: 'fork',
-        message: 'Whether to fork component source code ？(是否复制基础组件源代码)\n复制组件源码后，该组件将完全独立，无法继续跟随基础组件能力升级变化，请慎重处理；',
+        message: 'Whether to fork component source code ？(是否复制基础组件源代码)\n复制组件源码后，该组件将完全独立，无法继续跟随基础组件能力升级变化，请慎重处理；\n 命名执行完成后请重新执行 npm install 装包',
         when: (answers) => !!answers.overloadBaseUI,
         default: false,
     });
@@ -101,6 +101,8 @@ module.exports = {
         const compName = upperFirst(camelCase(data.name));
         const tagName = kebabCase(data.name);
 
+        const resetName = `${compName}.name = '${kebabCase(compName)}';\n`;
+
         const actions = [...makeFileList.map((item) => ({
             type: 'add',
             path: `${relationPath}/${tagName}/${item}`,
@@ -116,7 +118,7 @@ module.exports = {
         })), {
             path: path.resolve(process.cwd(), './src/components/index.ts'),
             pattern: /(\/\/ COMPONENT IMPORTS)/g,
-            template: `import ${compName} from './${tagName}';\n$1`,
+            template: `import ${compName} from './${tagName}';\n${data.fork ? resetName : ''}$1`,
             type: 'modify',
         },
         {

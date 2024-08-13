@@ -16,8 +16,7 @@ export default defineConfig(({ command }) => {
         jsx: true,
         jsxInclude: [
           /.(jsx|tsx)$/,
-          '.lcap/**/*.js',
-          '.lcap/**/*.ts',
+          /\.lcap\/.*(js|ts)$/,
         ],
         jsxOptions: {
           vModel: true,

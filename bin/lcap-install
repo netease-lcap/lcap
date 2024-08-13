@@ -24,7 +24,8 @@ const argv = require('minimist')(process.argv.slice(2));
   }
 
   if (argv.once) {
-    if (!pkg.lcap || !pkg.lcap[LCAP_UI] || fs.existsSync(path.resolve(cwd, LCAP_MODULES, LCAP_UI, LCAP_MODULE_FILE_NAME))) {
+    const moduleFilePath = path.resolve(cwd, LCAP_MODULES, LCAP_UI, LCAP_MODULE_FILE_NAME)
+    if (!pkg.lcap || !pkg.lcap[LCAP_UI] || fs.existsSync(moduleFilePath)) {
       return;
     }
   }
