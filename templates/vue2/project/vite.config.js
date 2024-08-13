@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import path from 'path';
 import { createVuePlugin as vue2 } from '@lcap/vite-plugin-vue2';
-import { lcapPlugin } from '@lcap/builder';
+import { createGenScopedName, lcapPlugin } from '@lcap/builder';
 
 // 设置测试运行的时区
 process.env.TZ = 'Asia/Shanghai';
@@ -41,6 +41,11 @@ export default defineConfig(({ command }) => {
       'process.env': {
         VUE_APP_DESIGNER: false,
         NODE_ENV: command === 'build' ? 'production' : 'development',
+      },
+    },
+    css: {
+      modules: {
+        generateScopedName: createGenScopedName(pkgInfo.name, './src'),
       },
     },
     build: {
