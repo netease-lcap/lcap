@@ -32,9 +32,14 @@ export default defineConfig(({ command }) => {
       }),
     ],
     resolve: {
+      extensions: ['.js', '.ts', '.tsx', '.jsx', '.vue', '.mjs', '.cjs', '.json'],
       alias: {
         '@': path.resolve(__dirname, './src'),
         '@lcap-ui': path.resolve(__dirname, './.lcap/lcap-ui/package'),
+        'cloud-ui.vusion/src': path.resolve(__dirname, './.lcap/lcap-ui/package/cloudui'),
+        'swiper/swiper-bundle.esm.js': path.resolve(__dirname, './node_modules/swiper/swiper-bundle.esm.js'),
+        '@joskii/jflow-core': path.resolve(__dirname, './node_modules/@joskii/jflow-core/dist/jflow.es.min.js'),
+        '@joskii/jflow-vue2-plugin': path.resolve(__dirname, './node_modules/@joskii/jflow-vue2-plugin/dist/jflow-vue2-plugin.es.min.js'),
       },
     },
     define: {
