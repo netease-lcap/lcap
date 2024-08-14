@@ -101,8 +101,6 @@ module.exports = {
         const compName = upperFirst(camelCase(data.name));
         const tagName = kebabCase(data.name);
 
-        const resetName = `${compName}.name = '${kebabCase(compName)}';\n`;
-
         const actions = [...makeFileList.map((item) => ({
             type: 'add',
             path: `${relationPath}/${tagName}/${item}`,
@@ -118,7 +116,7 @@ module.exports = {
         })), {
             path: path.resolve(process.cwd(), './src/components/index.ts'),
             pattern: /(\/\/ COMPONENT IMPORTS)/g,
-            template: `import ${compName} from './${tagName}';\n${data.fork ? resetName : ''}$1`,
+            template: `import ${compName} from './${tagName}';\n$1`,
             type: 'modify',
         },
         {
