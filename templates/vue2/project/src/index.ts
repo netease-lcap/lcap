@@ -14,6 +14,10 @@ const UtilsLogics = {
 const UseComponents = {
   install: (Vue) => {
     Object.keys(Components).forEach((name) => {
+      if (Components[name].Component && Components[name].install) {
+        Vue.component(name, Components[name].Component);
+        return;
+      }
       Vue.component(name, Components[name])
     })
   }
