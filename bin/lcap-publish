@@ -28,11 +28,13 @@ program
     .option('--manager <manager>', 'Change publish manager. For example: --manager cnpm')
     .option('--registry <url>', 'Use custom registry if manager default registry is not you want. For example: --registry https://registry.npm.taobao.org')
     .option('--skip-npm', 'Skip npm publish. Useful when package published but error happened')
+    .option('---asset-target', 'npm publish asset target.')
     .parse(process.argv);
 
 const name = pkg.name;
 const currentVersion = pkg.version;
 const version = program.args[0] && semver.clean(program.args[0]);
+const assetTarget = 'library';
 
 async function checkConfig(cwd) {
     const checkFiles = ['nasl.extension.json', 'usage.json'];
@@ -71,7 +73,7 @@ async function publish() {
         formData.append('zipFile', fs.createReadStream(zipPath));
         formData.append('tags', '');
         formData.append('description', '');
-        const result = await pfAxios.post('/api/v1/asset-center/library/upload', formData, {
+        const result = await pfAxios.post(`/api/v1/asset-center/${assetTarget}/upload`, formData, {
             headers: {
                 ...formData.getHeaders(),
                 Cookie: `authorization=${authorization}`,
