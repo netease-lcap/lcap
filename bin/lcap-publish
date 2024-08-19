@@ -34,7 +34,8 @@ program
 const name = pkg.name;
 const currentVersion = pkg.version;
 const version = program.args[0] && semver.clean(program.args[0]);
-const assetTarget = 'library';
+// 获取 asset-target
+const assetTarget = program.assetTarget || 'library';
 
 async function checkConfig(cwd) {
     const checkFiles = ['nasl.extension.json', 'usage.json'];
