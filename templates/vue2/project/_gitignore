@@ -24,5 +24,8 @@ vetur
 *.tgz
 
 # lcap files
+.lcap
+source.zip
+manifest
 nasl.extension.*
 *@*.zip

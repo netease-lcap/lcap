@@ -3,9 +3,9 @@
 const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
-const vusion = require('vusion-api');
+const logger = require('../lib/logger');
+const { listAllFiles } = require('../lib/fs-utils');
 const upload = require('../lib/upload');
-const cli = vusion.cli;
 
 /**
  * Parse Commands
@@ -59,7 +59,7 @@ const prefix = `packages/${prefixPath ? prefixPath + '/' : ''}${typeof program.n
 let formFiles;
 
 if (fs.statSync(source).isDirectory()) {
-    formFiles = vusion.fs.listAllFiles(source, {
+    formFiles = listAllFiles(source, {
         type: 'file',
         dot: false,
         patterns: ['!**/node_modules', '!**/.git', '!public/**'],
@@ -69,7 +69,7 @@ if (fs.statSync(source).isDirectory()) {
 }
 
 if (!formFiles.length) {
-    cli.warn('No files found!');
+    logger.warn('No files found!');
     process.exit(0);
 }
 

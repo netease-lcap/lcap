@@ -1,22 +1,18 @@
 #!/usr/bin/env node
-
 const fs = require('fs-extra');
 const path = require('path');
 const semver = require('semver');
 const chalk = require('chalk');
-const inquirer = require('inquirer');
-const vusion = require('vusion-api');
-const configurator = require('../lib/config');
-const utils = require('../lib/utils');
-const cli = vusion.cli;
-const querystring = require('querystring');
 const FormData = require('form-data');
+const logger = require('../lib/logger');
+const { exec } = require('../lib/exec');
+const utils = require('../lib/utils');
 
 const cwd = process.cwd();
 const pkgPath = path.resolve(cwd, 'package.json');
 if (!fs.existsSync(pkgPath)) {
-    console.error('[ERROR] Not a npm package');
-    console.error('Please locate into a npm package directory.');
+    logger.error('[ERROR] Not a npm package');
+    logger.error('Please locate into a npm package directory.');
     process.exit(1);
 }
 const pkg = require(pkgPath);
@@ -61,9 +57,9 @@ async function publish() {
 
     try {
         if (pkg.scripts.build && pkg.scripts.usage) {
-            await cli.exec('npm run build && npm run usage');
+            await exec('npm run build && npm run usage');
         } else if (pkg.scripts.build) {
-            await cli.exec('npm run build');
+            await exec('npm run build');
         }
 
         await checkConfig(cwd);
@@ -82,13 +78,13 @@ async function publish() {
             },
         });
         if (result.data.success) {
-            cli.done('Successfully published!');
+            logger.done('Successfully published!');
         } else {
             throw new Error(result.data.msg);
         }
     } catch (e) {
-        cli.error('Failed to publish!');
-        e && console.error(e.response ? e.response.data : e);
+        logger.error('Failed to publish!');
+        e && logger.error(e.response ? e.response.data : e);
         process.exit(1);
     }
 }

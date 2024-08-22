@@ -24,17 +24,14 @@ const program = require('commander');
 program
     .usage('<command> [options]')
     .version(pkg.version)
-    // Project commands
-    .command('init <type> <name>', `Initialize a kind of material: ${chalk.yellow('component')} ...}`)
     .command('config <action> <key> [value]', 'Configure CLI options')
+    .command('init <type> <name>', `Initialize a kind of material: ${chalk.yellow('component')} ...}`)
+    .command('create', 'Generate Component and Logic')
+    .command('usage', 'Generate usage.json<old>')
     .command('publish <version>', 'Publish a new version')
-    // .command('screenshot <url|local-file>', 'Take a screenshot of a web page')
     .command('deploy', 'Push files to NOS static bucket')
-    .command('readme', 'Generate final readable README.md from api.yaml and docs')
-    .command('usage', 'Generate usage.json')
-    .command('build', 'build lcap extension files')
-    .command('vetur', 'Generate tags.json and attributes.json for Vetur')
-    .command('create', 'Generate Component and Logic');
+    .command('install', 'Install lcap packages')
+    ;
 
 // output help information on unknown commands
 program.on('command:*', ([cmd]) => {

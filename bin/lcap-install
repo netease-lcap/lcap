@@ -1,0 +1,83 @@
+#!/usr/bin/env node
+const path = require("path");
+const fs = require("fs-extra");
+const { installLcapUI, promptInstallUI } = require("../lib/install");
+const { isLcapLibrary, getFrameWorkKind } = require("../lib/project");
+const { LCAP_UI, LCAP_MODULES, LCAP_MODULE_FILE_NAME } = require('../lib/constants');
+const logger = require('../lib/logger');
+
+const cwd = process.cwd();
+const pkgPath = path.resolve(cwd, "package.json");
+if (!fs.existsSync(pkgPath)) {
+  logger.error("[ERROR] Not a npm package");
+  logger.error("Please locate into a npm package directory.");
+  process.exit(1);
+}
+
+const argv = require('minimist')(process.argv.slice(2));
+
+(async function () {
+  const pkg = fs.readJSONSync(pkgPath, 'utf-8');
+  if (!isLcapLibrary(pkg)) {
+    logger.error(`该项目不是 codewave 依赖库，不支持此命令`);
+    return;
+  }
+
+  if (argv.once) {
+    const moduleFilePath = path.resolve(cwd, LCAP_MODULES, LCAP_UI, LCAP_MODULE_FILE_NAME)
+    if (!pkg.lcap || !pkg.lcap[LCAP_UI] || fs.existsSync(moduleFilePath)) {
+      return;
+    }
+  }
+
+  const framework = getFrameWorkKind(pkg);
+
+  let params = {
+    framework,
+  };
+
+  if (pkg.lcap && pkg.lcap[LCAP_UI]) {
+    params = {
+      ...params,
+      ...pkg.lcap[LCAP_UI],
+    };
+  }
+
+  if (!params.platform || !params.version || !params.type) {
+    const answer = await promptInstallUI();
+    params = {
+      ...params,
+      ...answer,
+    };
+  }
+
+  try {
+    logger.info('开始安装 LCAP UI......');
+    const env = {
+      framework: framework || 'vue2',
+      ...params,
+    };
+    await installLcapUI({ ...env });
+    logger.done('安装 LCAP UI 成功');
+
+    if (!pkg.lcap) {
+      pkg.lcap = {
+        [LCAP_UI]: {
+          ...env,
+        },
+      };
+    } else if (!pkg.lcap[LCAP_UI]) {
+      pkg.lcap[LCAP_UI] = {
+        ...env,
+      };
+    }
+
+    if (!pkg.scripts.postinstall) {
+      pkg.scripts['postinstall'] = "lcap install --once";
+    }
+    
+    fs.writeJSONSync(pkgPath, pkg, { spaces: 2 });
+  } catch(e) {
+    logger.error(`安装 LCAP 模块失败，${JSON.stringify(params)}，${e.message}`);
+  }
+})();
