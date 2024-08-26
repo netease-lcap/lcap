@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      archive-type:
+        specifier: ^4.0.0
+        version: 4.0.0
       archiver:
         specifier: ^6.0.0
         version: 6.0.2
@@ -26,24 +29,39 @@ importers:
       crypto-js:
         specifier: ^4.1.1
         version: 4.2.0
+      decompress:
+        specifier: ^4.2.1
+        version: 4.2.1
       didyoumean:
         specifier: ^1.2.1
         version: 1.2.2
-      download:
-        specifier: ^8.0.0
-        version: 8.0.0
+      ext-name:
+        specifier: ^5.0.0
+        version: 5.0.0
+      file-type:
+        specifier: ^11.1.0
+        version: 11.1.0
+      filenamify:
+        specifier: ^3.0.0
+        version: 3.0.0
       form-data:
         specifier: ^4.0.0
         version: 4.0.0
       fs-extra:
         specifier: ^8.1.0
         version: 8.1.0
+      get-stream:
+        specifier: ^4.1.0
+        version: 4.1.0
       glob:
         specifier: ^7.1.6
         version: 7.2.3
       globby:
         specifier: ^10.0.1
         version: 10.0.2
+      got:
+        specifier: ^8.3.1
+        version: 8.3.2
       inquirer:
         specifier: ^7.0.0
         version: 7.3.3
@@ -59,6 +77,9 @@ importers:
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
+      make-dir:
+        specifier: ^2.1.0
+        version: 2.1.0
       markdown-it:
         specifier: ^11.0.1
         version: 11.0.1
@@ -71,6 +92,12 @@ importers:
       ora:
         specifier: ^4.0.3
         version: 4.1.1
+      p-event:
+        specifier: ^2.1.0
+        version: 2.3.1
+      pify:
+        specifier: ^4.0.1
+        version: 4.0.1
       plop:
         specifier: 2.7.6
         version: 2.7.6
@@ -425,10 +452,6 @@ packages:
   constant-case@2.0.0:
     resolution: {integrity: sha512-eS0N9WwmjTqrOmR3o83F5vW8Z+9R1HnVz3xmzT2PMFug9ly+Au/fxRWlEBSb6LcZwspSsEn9Xs1uw9YgzAg1EQ==}
 
-  content-disposition@0.5.4:
-    resolution: {integrity: sha512-FveZTNuGw04cxlAiWbzi6zTAL/lhehaWbTtgluJh4/E95DqMwTmha3KZN1aAWA8cFIhHzMZUvLevkw5Rqk+tSQ==}
-    engines: {node: '>= 0.6'}
-
   copy-descriptor@0.1.1:
     resolution: {integrity: sha512-XgZ0pFcakEUlbwQEVNg3+QAis1FyTL3Qel9FYy8pSkQqoG3PNoT0bOCQtOXcOkur21r2Eq2kI+IE+gsmAEVlYw==}
     engines: {node: '>=0.10.0'}
@@ -550,10 +573,6 @@ packages:
   dot-prop@4.2.1:
     resolution: {integrity: sha512-l0p4+mIuJIua0mhxGoh4a+iNL9bmeK5DvnSVQa6T0OhrVmaEa1XScX5Etc673FePCJOArq/4Pa2cLGODUWTPOQ==}
     engines: {node: '>=4'}
-
-  download@8.0.0:
-    resolution: {integrity: sha512-ASRY5QhDk7FK+XrQtQyvhpDKanLluEEQtWl/J7Lxuf/b+i8RYh997QeXvL85xitrmRKVlx9c7eTrcRdq2GS4eA==}
-    engines: {node: '>=10'}
 
   duplexer3@0.1.5:
     resolution: {integrity: sha512-1A8za6ws41LQgv9HrE/66jyC5yuSjQ3L/KOpFtoBilsAK2iA2wuS5rTt1OCzIvtS2V7nVmedsUU+DGRcjBmOYA==}
@@ -2279,10 +2298,6 @@ snapshots:
       snake-case: 2.1.0
       upper-case: 1.1.3
 
-  content-disposition@0.5.4:
-    dependencies:
-      safe-buffer: 5.2.1
-
   copy-descriptor@0.1.1: {}
 
   core-js-pure@3.36.0: {}
@@ -2409,20 +2424,6 @@ snapshots:
   dot-prop@4.2.1:
     dependencies:
       is-obj: 1.0.1
-
-  download@8.0.0:
-    dependencies:
-      archive-type: 4.0.0
-      content-disposition: 0.5.4
-      decompress: 4.2.1
-      ext-name: 5.0.0
-      file-type: 11.1.0
-      filenamify: 3.0.0
-      get-stream: 4.1.0
-      got: 8.3.2
-      make-dir: 2.1.0
-      p-event: 2.3.1
-      pify: 4.0.1
 
   duplexer3@0.1.5: {}
 
