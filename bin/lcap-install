@@ -79,6 +79,7 @@ const argv = require('minimist')(process.argv.slice(2));
     
     fs.writeJSONSync(pkgPath, pkg, { spaces: 2 });
   } catch(e) {
-    logger.error(`安装 LCAP 模块失败，${JSON.stringify(params)}，${e.message}`);
+    logger.error(`安装 LCAP 模块失败，${JSON.stringify(params)}`);
+    logger.error(e);
   }
 })();
