@@ -45,7 +45,7 @@ const argv = require('minimist')(process.argv.slice(2));
   }
 
   if (!params.platform || !params.version || !params.type) {
-    const answer = await promptInstallUI();
+    const answer = await promptInstallUI(framework);
     params = {
       ...params,
       ...answer,
