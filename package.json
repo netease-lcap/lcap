@@ -1,7 +1,7 @@
 {
   "name": "lcap",
   "description": "CLI for Lcap Projects, including Application and UI Library.",
-  "version": "0.5.7-beta.2",
+  "version": "0.5.7-beta.3",
   "author": "daysai <wddpwzz36@gmail.com>",
   "bin": {
     "lcap": "bin/lcap"
