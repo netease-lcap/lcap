@@ -73,8 +73,10 @@ const argv = require('minimist')(process.argv.slice(2));
       };
     }
 
-    if (!pkg.scripts.postinstall) {
-      pkg.scripts['postinstall'] = "lcap install --once";
+    if (!pkg.scripts['lcap:install']) {
+      pkg.scripts['lcap:install'] = "lcap install --once";
+      pkg.scripts['prestart'] = 'npm run lcap:install';
+      pkg.scripts['prebuild'] = 'npm run lcap:install';
     }
     
     fs.writeJSONSync(pkgPath, pkg, { spaces: 2 });
