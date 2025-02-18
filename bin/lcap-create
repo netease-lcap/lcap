@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+
+import { execSync } from '../lib/exec';
+
 const path = require('path');
 const { Plop, run } = require('plop');
 const args = process.argv.slice(2);
@@ -14,6 +17,11 @@ const framework = getFrameWorkKind(pkg);
 (async function () {
   if (!isLcapLibrary(pkg)) {
     logger.error(`该项目不是 codewave 依赖库，不支持此命令`);
+    return;
+  }
+
+  if (pkg.devDependencies && pkg.devDependencies['@lcap/builder'] && semver.gt(semver.minVersion(pkg.devDependencies['@lcap/builder']).version, '1.5.9')) {
+    execSync('npx lcap-scripts create');
     return;
   }
 
