@@ -17,7 +17,7 @@ if (!fs.existsSync(pkgPath)) {
 const argv = require('minimist')(process.argv.slice(2));
 
 (async function () {
-  const pkg = fs.readJSONSync(pkgPath, 'utf-8');
+  let pkg = fs.readJSONSync(pkgPath, 'utf-8');
   if (!isLcapLibrary(pkg)) {
     logger.error(`该项目不是 codewave 依赖库，不支持此命令`);
     return;
@@ -61,6 +61,7 @@ const argv = require('minimist')(process.argv.slice(2));
     await installLcapUI({ ...env });
     logger.done('安装 LCAP UI 成功');
 
+    pkg = fs.readJSONSync(pkgPath, 'utf-8');
     if (!pkg.lcap) {
       pkg.lcap = {
         [LCAP_UI]: {
