@@ -56,7 +56,7 @@ if (list.length > 0) {
     prompts.unshift({
         type: 'list',
         name: 'overloadBaseUI',
-        message: 'Whether overload base component? (是否重载基础组件)',
+        message: '是否重载基础组件？',
         default: '',
         pageSize: 30,
         choices: [
@@ -66,7 +66,7 @@ if (list.length > 0) {
     }, {
         type: 'input',
         name: 'prefix',
-        message: 'Please Input overload prefix? (请输入重载名称前缀，例如 ex)',
+        message: '请输入重载名称前缀（例如 ex）：',
         when: (answers) => !!answers.overloadBaseUI,
         default: 'ex',
         filter: (val) => {
@@ -78,7 +78,7 @@ if (list.length > 0) {
     }, {
         type: 'confirm',
         name: 'fork',
-        message: 'Whether to fork component source code ？(是否复制基础组件源代码)\n复制组件源码后，该组件将完全独立，无法继续跟随基础组件能力升级变化，请慎重处理；\n 命令执行完成后请重新执行 npm install 装包',
+        message: '是否复制基础组件源代码？\n复制组件源码后，该组件将完全独立，无法继续跟随基础组件能力升级变化，请慎重处理；\n 命令执行完成后请重新执行 npm install 装包',
         when: (answers) => !!answers.overloadBaseUI && (!lcapUIInfo.pkgName || ['@lcap/pc-ui', 'cloud-ui.vusion', '@lcap/mobile-ui'].includes(lcapUIInfo.pkgName)),
         default: false,
     });
