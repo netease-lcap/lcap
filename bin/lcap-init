@@ -4,17 +4,52 @@ const inquirer = require('inquirer');
 const chalk = require('chalk');
 const init = require('../lib/init');
 const utils = require('../lib/utils');
+const { exec } = require('../lib/exec');
+const args = process.argv.slice(2);
+const cliArgs = require('minimist')(args);
 const snakeCase = require('lodash').snakeCase;
 
 function getMessage() {
     return `请输入依赖库名称\n（例如: ${chalk.cyan('library_example')}）：`;
 }
 
-const { argv } = process;
-(async function () {
+(async function() {
+    const { _: subArgs, ...options } = cliArgs;
+    const projectName = subArgs[0];
+
+    if (!options.old) {
+        let commands = ['npm create lcap-extension@latest', '--'];
+        if (options.env === 'dev') {
+            commands = ['cle'];
+        } else if (options.env === 'beta') {
+            commands = ['npm create lcap-extension@beta', '--'];
+        }
+
+        if (projectName) {
+            commands.push(`--name ${projectName}`);
+        }
+
+        Object.keys(options).forEach(key => {
+            if (['env'].includes(key)) return;
+            commands.push(`--${key} ${options[key]}`);
+        });
+
+        try {
+            await exec(...commands);
+        } catch (error) {
+            if (error) {
+                console.log(chalk.red(`执行创建命令${commands.join(' ')}失败`));
+                console.error(error);
+            }
+            console.log(chalk.green('已取消初始化'));
+        }
+        return;
+    }
+    
     const type = 'component';
-    if (argv.length <= 2) {
-        const { name } = await inquirer.prompt([
+    let name;
+    if (!projectName) {
+        const answers = await inquirer.prompt([
             {
                 type: 'input',
                 name: 'name',
@@ -29,28 +64,19 @@ const { argv } = process;
             },
         ]);
 
-        return init({
-            type,
-            material: type,
-            name,
-            path: utils.getFileName(name),
-            access: 'public',
-            team: '',
-        }, {
-            isUser: false,
-        });
-    } else if (argv.length === 3) {
-        const name = snakeCase(argv[2]);
-        return init({
-            type,
-            material: type,
-            name,
-            path: utils.getFileName(name),
-            access: 'public',
-            team: '',
-        }, {
-            isUser: false,
-        });
+        name = answers.name;
+    } else {
+        name = snakeCase(projectName);
     }
-})();
 
+    return init({
+        type,
+        material: type,
+        name,
+        path: utils.getFileName(name),
+        access: 'public',
+        team: '',
+    }, {
+        isUser: false,
+    });
+})()
