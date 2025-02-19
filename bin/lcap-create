@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
-import { execSync } from '../lib/exec';
-
 const path = require('path');
 const { Plop, run } = require('plop');
 const args = process.argv.slice(2);
 const argv = require('minimist')(args);
 const { getFrameWorkKind, isOldProject, isLcapLibrary } = require('../lib/project');
+const { exec } = require('../lib/exec');
 const logger = require('../lib/logger');
 
 const cwd = process.cwd();
