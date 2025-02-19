@@ -2,10 +2,11 @@
 
 const path = require('path');
 const { Plop, run } = require('plop');
+const semver = require('semver');
 const args = process.argv.slice(2);
 const argv = require('minimist')(args);
 const { getFrameWorkKind, isOldProject, isLcapLibrary } = require('../lib/project');
-const { exec } = require('../lib/exec');
+const { execSync } = require('../lib/exec');
 const logger = require('../lib/logger');
 
 const cwd = process.cwd();
