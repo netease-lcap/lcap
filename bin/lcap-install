@@ -62,17 +62,14 @@ const argv = require('minimist')(process.argv.slice(2));
     logger.done('安装 LCAP UI 成功');
 
     pkg = fs.readJSONSync(pkgPath, 'utf-8');
+
     if (!pkg.lcap) {
-      pkg.lcap = {
-        [LCAP_UI]: {
-          ...env,
-        },
-      };
-    } else if (!pkg.lcap[LCAP_UI]) {
-      pkg.lcap[LCAP_UI] = {
-        ...env,
-      };
+      pkg.lcap = {};
     }
+
+    pkg.lcap[LCAP_UI] = {
+      ...env,
+    };
 
     if (!pkg.scripts['lcap:install']) {
       pkg.scripts['lcap:install'] = "lcap install --once";
