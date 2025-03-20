@@ -6,16 +6,10 @@
   "title": "React demo依赖库",
   "description": "react fontlibrary demo",
   "main": "dist-theme/index.js",
+  "module": "dist-theme/index.mjs",
   "files": [
     "dist-theme"
   ],
-  "exports": {
-    ".": {
-      "default": "./dist-theme/index.js",
-      "import": "./dist-theme/index.mjs",
-      "require": "./dist-theme/index.cjs"
-    }
-  },
   "scripts": {
     "dev": "npm run start",
     "start": "storybook dev -p 8008",

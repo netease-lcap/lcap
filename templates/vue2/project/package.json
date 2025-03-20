@@ -6,16 +6,10 @@
   "title": "Vue 依赖库demo",
   "description": "Vue 依赖库demo",
   "main": "dist-theme/index.js",
+  "module": "dist-theme/index.mjs",
   "files": [
     "dist-theme"
   ],
-  "exports": {
-    ".": {
-      "default": "./dist-theme/index.js",
-      "import": "./dist-theme/index.mjs",
-      "require": "./dist-theme/index.cjs"
-    }
-  },
 
   "scripts": {
     "dev": "npm run start",
