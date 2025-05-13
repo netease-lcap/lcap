@@ -1,5 +1,11 @@
 # 更新日志
 
+## 0.6.0
+
+* init 命令迁移到 create-lcap-extension 执行
+* init 命令支持 `--env beta` 运行测试环境
+* create 命令优先使用 `npm run create`
+
 ## 0.5.8
 
 * 支持 ElementUI 组件库二次开发；
